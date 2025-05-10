@@ -1,8 +1,10 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { HStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, RadioButton, Text, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewTaskModal() {
   const router = useRouter();
@@ -30,79 +32,90 @@ export default function NewTaskModal() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text variant="titleLarge">Nueva Tarea</Text>
+    <SafeAreaView>
+      <ScrollView contentContainerStyle={styles.container}>
+        <HStack style={styles.topBar}>
+          <Button
+            icon="arrow-left"
+            mode="text"
+            onPress={() => router.back()}
+            style={{ marginRight: 8 }} 
+            children=""
+          />
+          <Text variant="titleLarge">Agregar nueva tarea</Text>
+        </HStack>
 
-      <TextInput
-        label="Título"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-      />
-
-      <TextInput
-        label="Descripción"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={3}
-        style={styles.input}
-      />
-
-      {/* Fecha */}
-      <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
-        Seleccionar fecha: {date.toLocaleDateString()}
-      </Button>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={(_, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) setDate(selectedDate);
-          }}
+        <TextInput
+          label="Título"
+          value={title}
+          onChangeText={setTitle}
+          style={styles.input}
         />
-      )}
 
-      {/* Hora */}
-      <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
-        Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-      </Button>
-      {showTimePicker && (
-        <DateTimePicker
-          value={time}
-          mode="time"
-          display="default"
-          onChange={(_, selectedTime) => {
-            setShowTimePicker(false);
-            if (selectedTime) setTime(selectedTime);
-          }}
+        <TextInput
+          label="Descripción"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+          style={styles.input}
         />
-      )}
 
-      {/* Recordatorio */}
-      <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
-      <RadioButton.Group onValueChange={setReminder} value={reminder}>
-        <RadioButton.Item label="5 min antes" value="5" />
-        <RadioButton.Item label="10 min antes" value="10" />
-        <RadioButton.Item label="30 min antes" value="30" />
-        <RadioButton.Item label="1 día antes" value="1440" />
-      </RadioButton.Group>
+        {/* Fecha */}
+        <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
+          Seleccionar fecha: {date.toLocaleDateString()}
+        </Button>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={(_, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        )}
 
-      {/* Repetir */}
-      <View style={styles.repeat}>
-        <Checkbox
-          status={repeat ? 'checked' : 'unchecked'}
-          onPress={() => setRepeat(!repeat)}
-        />
-        <Text>Repetir tarea</Text>
-      </View>
+        {/* Hora */}
+        <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
+          Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Button>
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="default"
+            onChange={(_, selectedTime) => {
+              setShowTimePicker(false);
+              if (selectedTime) setTime(selectedTime);
+            }}
+          />
+        )}
 
-      <Button mode="contained" onPress={handleSave} style={{ marginTop: 16 }}>
-        Guardar Tarea
-      </Button>
-    </ScrollView>
+        {/* Recordatorio */}
+        <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
+        <RadioButton.Group onValueChange={setReminder} value={reminder}>
+          <RadioButton.Item label="5 min antes" value="5" />
+          <RadioButton.Item label="10 min antes" value="10" />
+          <RadioButton.Item label="30 min antes" value="30" />
+          <RadioButton.Item label="1 día antes" value="1440" />
+        </RadioButton.Group>
+
+        {/* Repetir */}
+        <View style={styles.repeat}>
+          <Checkbox
+            status={repeat ? 'checked' : 'unchecked'}
+            onPress={() => setRepeat(!repeat)}
+          />
+          <Text>Repetir tarea</Text>
+        </View>
+
+        <Button mode="contained" onPress={handleSave} style={{ marginTop: 16 }}>
+          Guardar Tarea
+        </Button>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -117,5 +130,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'flex-start',
   },
 });
