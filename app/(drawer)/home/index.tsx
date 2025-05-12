@@ -1,12 +1,16 @@
+import ChipFilter from "@/components/ChipFilter";
+import ProgressBarComponent from "@/components/ProgressBar";
+import useTasks from "@/hooks/UseTasks";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
-import { Chip, FAB, ProgressBar } from 'react-native-paper';
+import { FAB } from 'react-native-paper';
 
 export default function HomeScreen() {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState("Hoy");
+  const { filter, setFilter, tasks, completedTasks } = useTasks();
 
   const filters = ["Hoy", "Mañana", "Esta semana", "Todas"];
 
@@ -15,22 +19,15 @@ export default function HomeScreen() {
       <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{selectedFilter}</Text>
 
       {/* Barra de Progreso */}
-      <ProgressBar progress={0.3}  color="green" style={{ marginVertical: 8, height:10, borderRadius: 5}} />
-      <Text style={{ fontSize: 12, fontWeight: 'bold', alignSelf: "center", width: "100%" }}>Quedan 3 tareas de 7</Text>
+      <ProgressBarComponent
+        completed={completedTasks}
+        total={tasks.length}
+      />
 
       {/* Chips de filtros */}
       <View style={{ height: "auto"}}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ marginVertical: 8}}>
-          {filters.map(f => (
-            <Chip
-              key={f}
-              style={{ marginRight: 8, height: 30 }}
-              selected={selectedFilter === f}
-              onPress={() => setSelectedFilter(f)}
-            >
-              {f}
-            </Chip>
-          ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8}}>
+          <ChipFilter selected={filter} onSelect={setFilter}/>
         </ScrollView>
       </View>
 
@@ -40,7 +37,9 @@ export default function HomeScreen() {
           <Link href={{
             pathname: `../home/${i}`, // Enlace a la pantalla de detalle
             params: { id: i }, // Parámetro de ID
-          }} asChild>
+          }}
+          key={i} 
+          asChild>
             {/* Enlace a la pantalla de detalle */}                   
             <Pressable
               key={i}
