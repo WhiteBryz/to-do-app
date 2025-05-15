@@ -17,7 +17,7 @@ export interface Task {
   updatedAt: string;
 }
 
-const filters: { label: string; value: FilterOption }[] = [
+export const filters: { label: string; value: FilterOption }[] = [
   { label: 'Hoy', value: 'today' },
   { label: 'Esta semana', value: 'week' },
   { label: 'Este mes', value: 'month' },
