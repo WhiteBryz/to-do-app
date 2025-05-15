@@ -1,26 +1,24 @@
-export type ReminderOption = '5min' | '10min' | '30min' | '1day' | null;
-export type RepeatOption = 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+export type ReminderOption = '5min' | '10min' | '30min' | '1day';
 export type PriorityLevel = 'low' | 'medium' | 'high';
+export type FilterOption = 'today' | 'tomorrow' | 'week' | 'all';
 
 export interface Task {
   id: string;
   title: string;
   description: string;
-  date: string; // Formato ISO (ej: "2023-05-15T10:00:00.000Z")
-  time?: string; // Formato HH:mm (ej: "14:30")
+  note: string;
+  date: string; // ISO string
+  time: string; // HH:mm
+  priority: PriorityLevel;
+  reminder: ReminderOption;
+  repeat: boolean;
   completed: boolean;
-  reminder?: ReminderOption;
-  repeat?: RepeatOption;
-  category?: string;
-  priority?: PriorityLevel;
-  createdAt: string; // Fecha de creación en formato ISO
-  updatedAt?: string; // Fecha de última actualización en formato ISO
+  createdAt: string;
 }
 
-export interface TaskFormValues
-  extends Omit<Task, 'id' | 'completed' | 'createdAt' | 'updatedAt'> {
-  id?: string; // Opcional para edición
-  completed?: boolean; // Opcional para edición
-}
-
-export type FilterOption = 'today' | 'tomorrow' | 'week' | 'all';
+const filters: { label: string; value: FilterOption }[] = [
+  { label: "Hoy", value: "today" },
+  { label: "Mañana", value: "tomorrow" },
+  { label: "Esta semana", value: "week" },
+  { label: "Todas", value: "all" },
+];
