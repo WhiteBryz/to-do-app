@@ -1,6 +1,6 @@
 export type ReminderOption = '5min' | '10min' | '30min' | '1day';
 export type PriorityLevel = 'low' | 'medium' | 'high';
-export type FilterOption = 'today' | 'week' | 'month' | 'later';
+export type FilterOption = 'today' | 'week' | 'month' | 'later' | null;
 
 export interface Task {
   id: string;

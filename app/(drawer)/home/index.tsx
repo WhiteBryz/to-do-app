@@ -42,8 +42,8 @@ export default function HomeScreen() {
                         key={f.value}
                         label={f.label}
                         selected={filter === f.value}
-                        onSelect={() => setFilter(f.value)}
-                    />
+                        onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
+                    />                  
                 ))}
             </ScrollView>
 
