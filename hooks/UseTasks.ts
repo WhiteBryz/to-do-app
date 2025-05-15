@@ -1,6 +1,6 @@
+import { getAllTasks } from '@/store/taskStore';
+import { Task } from '@/types/task';
 import { useEffect, useState } from 'react';
-import { getAllTasks } from '../store/taskStore';
-import { Task } from '../types/task';
 
 export const useTasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);

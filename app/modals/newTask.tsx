@@ -1,3 +1,6 @@
+import { useTasks } from '@/hooks/UseTasks';
+import { addTask as addTaskStorage } from '@/store/taskStore';
+import { PriorityLevel, ReminderOption, Task } from '@/types/task';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
@@ -5,9 +8,6 @@ import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, RadioButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTasks } from '../../hooks/useTasks';
-import { addTask as addTaskStorage } from '../../store/taskStore';
-import { PriorityLevel, ReminderOption, Task } from '../../types/task';
 
 export default function NewTaskModal() {
   const router = useRouter();

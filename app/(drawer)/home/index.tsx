@@ -1,6 +1,6 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
-import { useTasks } from '@/hooks/useTasks';
+import { useTasks } from '@/hooks/UseTasks';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
