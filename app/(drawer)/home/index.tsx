@@ -1,7 +1,7 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
 import { useTasks } from '@/hooks/useTasks';
-import { FilterOption, Task } from '@/types/task';
+import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link } from 'expo-router';
@@ -14,13 +14,6 @@ export default function HomeScreen() {
     const [filter, setFilter] = useState<FilterOption>('today');
 
     const completedTasks = tasks.filter(t => t.completed).length;
-
-    const filters: { label: string; value: FilterOption }[] = [
-        { label: "Hoy", value: "today" },
-        { label: "Esta semana", value: "week" },
-        { label: "Este mes", value: "month" },
-        { label: "Después", value: "later" },
-    ];
 
     const filteredTasks = filter
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
