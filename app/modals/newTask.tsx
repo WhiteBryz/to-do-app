@@ -71,10 +71,11 @@ export default function NewTaskModal() {
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
+              setShowDatePicker(false); // ciérralo primero
+
               if (event.type === 'set' && selectedDate) {
-                setDate(new Date(selectedDate));
+                setDate(selectedDate);
               }
-              setShowDatePicker(false);
             }}
           />
         )}
@@ -89,10 +90,11 @@ export default function NewTaskModal() {
             mode="time"
             display="default"
             onChange={(event, selectedTime) => {
+              setShowTimePicker(false); // ciérralo primero
+
               if (event.type === 'set' && selectedTime) {
-                setTime(new Date(selectedTime));
+                setTime(selectedTime);
               }
-              setShowTimePicker(false);
             }}
           />
         )}

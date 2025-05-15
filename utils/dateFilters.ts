@@ -8,19 +8,14 @@ import {
 } from 'date-fns';
 import { FilterOption, Task } from '../types/task';
 
-export const getTaskCategory = (task: Task): FilterOption => {
+export const getTaskCategories = (task: Task): FilterOption[] => {
     const taskDate = parseISO(task.date);
+    const categories: FilterOption[] = [];
 
-    if (isToday(taskDate)) return 'today';
+    if (isToday(taskDate)) categories.push('today', 'week', 'month');
+    else if (isThisWeek(taskDate, { weekStartsOn: 1 })) categories.push('week', 'month');
+    else if (isThisMonth(taskDate)) categories.push('month');
+    else if (isAfter(taskDate, endOfMonth(new Date()))) categories.push('later');
 
-    // Si está en esta semana (incluyendo hoy)
-    if (isThisWeek(taskDate, { weekStartsOn: 1 })) return 'week';
-
-    // Si está en este mes (incluyendo semana y hoy)
-    if (isThisMonth(taskDate)) return 'month';
-
-    // Si está después del final del mes
-    if (isAfter(taskDate, endOfMonth(new Date()))) return 'later';
-
-    return null;
+    return categories;
 };

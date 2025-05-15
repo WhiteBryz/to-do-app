@@ -2,7 +2,7 @@ import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
 import { useTasks } from '@/hooks/useTasks';
 import { FilterOption, Task } from '@/types/task';
-import { getTaskCategory } from '@/utils/dateFilters';
+import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -23,7 +23,7 @@ export default function HomeScreen() {
     ];
 
     const filteredTasks = filter
-        ? tasks.filter(task => getTaskCategory(task) === filter)
+        ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
     return (
@@ -43,7 +43,7 @@ export default function HomeScreen() {
                         label={f.label}
                         selected={filter === f.value}
                         onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
-                    />                  
+                    />
                 ))}
             </ScrollView>
 
