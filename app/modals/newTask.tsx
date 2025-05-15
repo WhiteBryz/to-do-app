@@ -42,6 +42,7 @@ export default function NewTaskModal() {
       repeat,
       completed: false,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     await addTaskStorage(newTask);

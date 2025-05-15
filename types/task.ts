@@ -14,6 +14,7 @@ export interface Task {
   repeat: boolean;
   completed: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 const filters: { label: string; value: FilterOption }[] = [
