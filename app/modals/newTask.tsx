@@ -17,9 +17,9 @@ export default function NewTaskModal() {
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState<PriorityLevel>('medium');
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [time, setTime] = useState(new Date());
+  const [date, setDate] = useState(() => new Date());
+  const [time, setTime] = useState(() => new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);;
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminder, setReminder] = useState<ReminderOption>('10min');
   const [repeat, setRepeat] = useState(false);
@@ -64,16 +64,17 @@ export default function NewTaskModal() {
         <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
           Seleccionar fecha: {date.toLocaleDateString()}
         </Button>
+
         {showDatePicker && (
           <DateTimePicker
             value={date}
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
               if (event.type === 'set' && selectedDate) {
-                setDate(selectedDate);
+                setDate(new Date(selectedDate));
               }
+              setShowDatePicker(false);
             }}
           />
         )}
@@ -81,16 +82,17 @@ export default function NewTaskModal() {
         <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
           Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Button>
+
         {showTimePicker && (
           <DateTimePicker
             value={time}
             mode="time"
             display="default"
             onChange={(event, selectedTime) => {
-              setShowTimePicker(false);
               if (event.type === 'set' && selectedTime) {
-                setTime(selectedTime);
+                setTime(new Date(selectedTime));
               }
+              setShowTimePicker(false);
             }}
           />
         )}
