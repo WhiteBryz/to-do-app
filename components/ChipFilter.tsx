@@ -14,7 +14,6 @@ export default function ChipFilter({ label, selected, onSelect }: ChipFilterProp
   return (
     <Chip
       mode="outlined"
-      selected={selected}
       onPress={onSelect}
       style={[
         styles.chip,

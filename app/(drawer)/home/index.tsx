@@ -17,14 +17,14 @@ export default function HomeScreen() {
 
     const filters: { label: string; value: FilterOption }[] = [
         { label: "Hoy", value: "today" },
-        { label: "Mañana", value: "tomorrow" },
         { label: "Esta semana", value: "week" },
-        { label: "Todas", value: "all" },
+        { label: "Este mes", value: "month" },
+        { label: "Después", value: "later" },
     ];
 
-    const filteredTasks = tasks.filter(task =>
-        filter === 'all' ? true : getTaskCategory(task) === filter
-    );
+    const filteredTasks = filter
+        ? tasks.filter(task => getTaskCategory(task) === filter)
+        : tasks;
 
     return (
         <View style={{ flex: 1, padding: 16 }}>

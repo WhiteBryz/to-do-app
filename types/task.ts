@@ -1,6 +1,6 @@
 export type ReminderOption = '5min' | '10min' | '30min' | '1day';
 export type PriorityLevel = 'low' | 'medium' | 'high';
-export type FilterOption = 'today' | 'tomorrow' | 'week' | 'all';
+export type FilterOption = 'today' | 'week' | 'month' | 'later';
 
 export interface Task {
   id: string;
@@ -18,8 +18,8 @@ export interface Task {
 }
 
 const filters: { label: string; value: FilterOption }[] = [
-  { label: "Hoy", value: "today" },
-  { label: "Mañana", value: "tomorrow" },
-  { label: "Esta semana", value: "week" },
-  { label: "Todas", value: "all" },
+  { label: 'Hoy', value: 'today' },
+  { label: 'Esta semana', value: 'week' },
+  { label: 'Este mes', value: 'month' },
+  { label: 'Después', value: 'later' },
 ];
