@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Task } from '../types/task';
 import { getAllTasks } from '../store/taskStore';
+import { useFocusEffect } from 'expo-router';
 
 export const useTasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -12,9 +13,10 @@ export const useTasks = () => {
         setLoading(false);
     };
 
-    useEffect(() => {
+    // Ejecutar al montar y cada vez que se vuelve a enfocar la pantalla
+    useFocusEffect(() => {
         loadTasks();
-    }, []);
+    });
 
     return { tasks, loading, reload: loadTasks };
 };
