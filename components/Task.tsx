@@ -1,5 +1,6 @@
 import { Task } from '@/types/task';
-import { HStack, VStack } from '@react-native-material/core';
+import formatCustomDateTime from '@/utils/formatCustomDateTime';
+import { Divider, HStack, VStack } from '@react-native-material/core';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import IconButton from './IconCompleteTask';
@@ -27,21 +28,27 @@ export default function TaskComponent(props: TaskComponentProps) {
         }
     }
 
+    console.log(formatCustomDateTime(taskDetails.date, taskDetails.time))
+
+
     const styles = StyleSheet.create({
         taskContainer: {
-            height: 80,
+            height: 90,
             width: "100%",
             display: "flex",
             flexDirection: "row",
             paddingVertical: 10,
-            backgroundColor: "yellow",
+            backgroundColor: "gray",
+            borderRadius: 20,
         },
         taskTextContainer: {
-            width: "70%",
+            width: "68%",
             marginLeft: 5,
+            paddingRight: 10
         },
-        taskHour: {},
-        taskDate: {},
+        taskDateTime: {
+            color: "orange"
+        },
         taskPriorityContainer: {
             padding: 10,
             display: "flex",
@@ -50,7 +57,10 @@ export default function TaskComponent(props: TaskComponentProps) {
         },
         taskPriority: {
             padding: 5,
-            borderRadius: 5,
+            borderRadius: 15,
+            width: 50,
+            textAlign: "center",
+            fontWeight: 500
         },
         taskTextConditional: {
             textDecorationLine: taskDetails.completed ? "line-through" : "none",
@@ -62,27 +72,37 @@ export default function TaskComponent(props: TaskComponentProps) {
         },
         taskDescription: {
             fontSize: 12
+        },
+        divider: {
+            margin: 5,
+            opacity: 0.4
         }
     })
     return (
-        <HStack style={styles.taskContainer}>
-            {/* Icono que cambia cuando se toca */}
-            <IconButton onCheck={props.onCheck} isChecked={taskDetails.completed} />
-            {/* Texto con la información de la tarea */}
-            <VStack style={styles.taskTextContainer}>
-                <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskTitle, styles.taskTextConditional]}>{taskDetails.title}</Text>
-                <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskDescription, styles.taskTextConditional]}>{taskDetails.description}</Text>
-                <Text>{taskDetails.date.split('T')[0]} - {taskDetails.time}</Text>
-            </VStack>
-            {/* Nivel de prioridad */}
-            <VStack style={styles.taskPriorityContainer}>
-                <Text style={[
-                    styles.taskPriority,
-                    { backgroundColor: PriorityLevel[taskDetails.priority]?.color || 'gray' }
-                ]}>
-                    {PriorityLevel[taskDetails.priority]?.title || 'Sin prioridad'}
-                </Text>
-            </VStack>
-        </HStack>
+        <>
+            <HStack style={styles.taskContainer}>
+                {/* Icono que cambia cuando se toca */}
+                <IconButton onCheck={props.onCheck} isChecked={taskDetails.completed} />
+                {/* Texto con la información de la tarea */}
+                <VStack style={styles.taskTextContainer}>
+                    {/* Título */}
+                    <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskTitle, styles.taskTextConditional]}>{taskDetails.title}</Text>
+                    {/* Descripción */}
+                    <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskDescription, styles.taskTextConditional]}>{taskDetails.description}</Text>
+                    {/* Fecha y Hora */}
+                    <Text>{formatCustomDateTime(taskDetails.date, taskDetails.time)}</Text>
+                </VStack>
+                {/* Nivel de prioridad */}
+                <VStack style={styles.taskPriorityContainer}>
+                    <Text style={[
+                        styles.taskPriority,
+                        { backgroundColor: PriorityLevel[taskDetails.priority]?.color || 'gray' }
+                    ]}>
+                        {PriorityLevel[taskDetails.priority]?.title || 'Sin prioridad'}
+                    </Text>
+                </VStack>
+            </HStack>
+            <Divider style={styles.divider} color="gray"/>
+        </>
     )
 }

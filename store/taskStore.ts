@@ -42,3 +42,14 @@ export const searchTasks = async (query: string): Promise<Task[]> => {
     t.description.toLowerCase().includes(query.toLowerCase())
   );
 };
+
+export const toggleCompleted = async (id: string) => {
+    const tasks = await getAllTasks();
+    const task = tasks.find(t => t.id === id);
+    if (task){
+      task.completed = !task.completed;
+      updateTask(task);
+    } else{
+      throw new Error ("Error al encontrar el ID de la tarea.")
+    }
+}
