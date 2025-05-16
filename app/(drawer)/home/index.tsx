@@ -2,6 +2,7 @@ import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
 import TaskComponent from "@/components/Task";
 import { useTasks } from '@/hooks/UseTasks';
+import { updateTask } from "@/store/taskStore";
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
@@ -11,7 +12,7 @@ import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
 
 export default function HomeScreen() {
-    const { tasks } = useTasks();
+    const { tasks, setTasks } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
 
     const completedTasks = tasks.filter(t => t.completed).length;
@@ -20,6 +21,22 @@ export default function HomeScreen() {
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
+    // Función para actualizar una tarea en el estado
+    const toggleCompleted = async (id: string) => {
+        try {
+            const updatedTasks = tasks.map(task =>
+                task.id === id ? { ...task, completed: !task.completed } : task
+            );
+            setTasks(updatedTasks);
+
+            const task = updatedTasks.find(task => task.id === id)
+            if (task) {
+                await updateTask(task)
+            }
+        } catch (error) {
+            console.error("Error al actualizar la tarea", error);
+        }
+    };
     // console.log(filteredTasks)
     return (
         <View style={{ flex: 1, padding: 16 }}>
@@ -28,7 +45,7 @@ export default function HomeScreen() {
             </Text>
 
             {/* Barra de progreso */}
-            <ProgressBarComponent completed={completedTasks} total={tasks.length} />
+            <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
 
             {/* Filtros con chips */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
@@ -56,7 +73,7 @@ export default function HomeScreen() {
                         asChild
                     >
                         <Pressable>
-                            <TaskComponent task={task} onCheck={() => { alert("puto") }} />
+                            <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
                         </Pressable>
                     </Link>
                 ))}
