@@ -4,7 +4,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 
 interface IconButtonProps {
-    onCheck: () => void,
+    onCheck: () => Promise<void>,
     isChecked: boolean
 }
 
