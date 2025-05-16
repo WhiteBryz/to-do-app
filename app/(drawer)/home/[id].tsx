@@ -3,7 +3,8 @@ import { PriorityLevel, ReminderOption, Task } from '@/types/task';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Button, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { TextInput, Text, Button, Switch } from 'react-native-paper';
 
 export default function TaskDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,8 +21,6 @@ export default function TaskDetail() {
   const [repeat, setRepeat] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-
-  // Función para formatear la fecha como texto amigable
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('es-MX', {
       weekday: 'short',
@@ -30,6 +29,7 @@ export default function TaskDetail() {
       day: 'numeric',
     });
   };
+
   useEffect(() => {
     const loadTask = async () => {
       const found = await findTaskById(id);
@@ -39,7 +39,6 @@ export default function TaskDetail() {
         setDescription(found.description);
         setNote(found.note);
         setDate(found.date ? new Date(found.date) : new Date());
-        console.log('found.date', found.date);
         setTime(found.time);
         setPriority(found.priority);
         setReminder(found.reminder);
@@ -48,7 +47,6 @@ export default function TaskDetail() {
     };
     loadTask();
   }, [id]);
-
 
   const handleSave = async () => {
     if (!task) return;
@@ -79,30 +77,30 @@ export default function TaskDetail() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>Título</Text>
-      <TextInput style={styles.input} value={title} onChangeText={setTitle} />
+      <Text variant="titleMedium" style={styles.label}>Título</Text>
+      <TextInput mode="outlined" value={title} onChangeText={setTitle} style={styles.input} />
 
-      <Text style={styles.label}>Descripción</Text>
+      <Text variant="titleMedium" style={styles.label}>Descripción</Text>
       <TextInput
-        style={[styles.input, { height: 80 }]}
+        mode="outlined"
+        multiline
+        numberOfLines={3}
         value={description}
         onChangeText={setDescription}
-        multiline
+        style={styles.input}
       />
 
-      <Text style={styles.label}>Fecha límite</Text>
+      <Text variant="titleMedium" style={styles.label}>Fecha límite</Text>
       <Pressable onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.label}>{formatDate(date)}</Text>
+        <Text style={styles.pickerText}>{formatDate(date)}</Text>
       </Pressable>
-
       {showDatePicker && (
         <DateTimePicker
           value={date}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            setShowDatePicker(false); // ciérralo primero
-
+            setShowDatePicker(false);
             if (event.type === 'set' && selectedDate) {
               setDate(selectedDate);
             }
@@ -110,54 +108,65 @@ export default function TaskDetail() {
         />
       )}
 
-      <Text style={styles.label}>Hora límite</Text>
+      <Text variant="titleMedium" style={styles.label}>Hora límite</Text>
       <TextInput
-        style={styles.input}
+        mode="outlined"
         value={time}
-        placeholder="HH:mm"
         onChangeText={setTime}
+        placeholder="HH:mm"
+        style={styles.input}
       />
 
-      <Text style={styles.label}>Prioridad</Text>
+      <Text variant="titleMedium" style={styles.label}>Prioridad</Text>
       <View style={styles.priorityRow}>
         {(['low', 'medium', 'high'] as PriorityLevel[]).map((level) => (
           <Button
             key={level}
-            title={level}
-            color={priority === level ? '#007AFF' : '#ccc'}
+            mode={priority === level ? 'contained' : 'outlined'}
             onPress={() => setPriority(level)}
-          />
+            style={{ margin: 4 }}
+          >
+            {level}
+          </Button>
         ))}
       </View>
 
-      <Text style={styles.label}>Recordatorio</Text>
+      <Text variant="titleMedium" style={styles.label}>Recordatorio</Text>
       <View style={styles.priorityRow}>
         {(['5min', '10min', '30min', '1day'] as ReminderOption[]).map((opt) => (
           <Button
             key={opt}
-            title={opt}
-            color={reminder === opt ? '#007AFF' : '#ccc'}
+            mode={reminder === opt ? 'contained' : 'outlined'}
             onPress={() => setReminder(opt)}
-          />
+            style={{ margin: 4 }}
+          >
+            {opt}
+          </Button>
         ))}
       </View>
 
       <View style={styles.switchRow}>
-        <Text style={styles.label}>Repetir</Text>
+        <Text variant="titleMedium">Repetir</Text>
         <Switch value={repeat} onValueChange={setRepeat} />
       </View>
 
-      <Text style={styles.label}>Notas</Text>
+      <Text variant="titleMedium" style={styles.label}>Notas</Text>
       <TextInput
-        style={[styles.input, { height: 100 }]}
+        mode="outlined"
+        multiline
+        numberOfLines={4}
         value={note}
         onChangeText={setNote}
-        multiline
+        style={styles.input}
       />
 
       <View style={styles.buttonRow}>
-        <Button title="Guardar" onPress={handleSave} />
-        <Button title="Eliminar" onPress={handleDelete} color="#FF3B30" />
+        <Button mode="contained" onPress={handleSave} style={styles.button}>
+          Guardar
+        </Button>
+        <Button mode="outlined" onPress={handleDelete} textColor="red" style={styles.button}>
+          Eliminar
+        </Button>
       </View>
     </ScrollView>
   );
@@ -168,33 +177,38 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   label: {
-    fontWeight: 'bold',
     marginTop: 16,
     marginBottom: 4,
-    fontSize: 16,
   },
-  input: {
+  pickerText: {
+    fontSize: 16,
+    color: '#333',
+    padding: 8,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 6,
-    padding: 10,
-    fontSize: 16,
+  },
+  input: {
+    marginBottom: 12,
   },
   priorityRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 8,
+    marginVertical: 8,
   },
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
+    marginVertical: 16,
   },
   buttonRow: {
     marginTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 8,
   },
 });
