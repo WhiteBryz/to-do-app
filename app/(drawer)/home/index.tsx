@@ -1,5 +1,6 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
+import TaskComponent from "@/components/Task";
 import { useTasks } from '@/hooks/UseTasks';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
@@ -19,6 +20,7 @@ export default function HomeScreen() {
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
+    // console.log(filteredTasks)
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
@@ -53,18 +55,8 @@ export default function HomeScreen() {
                         href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
                         asChild
                     >
-                        <Pressable
-                            style={{
-                                padding: 16,
-                                backgroundColor: task.completed ? '#c8e6c9' : '#f5f5f5',
-                                borderRadius: 8,
-                                marginBottom: 8,
-                            }}
-                        >
-                            <Text style={{ fontWeight: 'bold' }}>{task.title}</Text>
-                            <Text style={{ color: '#666' }}>
-                                {task.date.split('T')[0]} - {task.time}
-                            </Text>
+                        <Pressable>
+                            <TaskComponent task={task} onCheck={() => { alert("puto") }} />
                         </Pressable>
                     </Link>
                 ))}
