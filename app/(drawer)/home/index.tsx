@@ -1,23 +1,28 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
-import { useTasks } from '@/hooks/UseTasks';
+import { useTasks } from '@/hooks/useTasks';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { Link } from 'expo-router';
-import { useState } from 'react';
+import { Link, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
 
+
 export default function HomeScreen() {
-    const { tasks } = useTasks();
+    const { tasks, reload } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
-
     const completedTasks = tasks.filter(t => t.completed).length;
-
     const filteredTasks = filter
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
+
+    useFocusEffect(
+        useCallback(() => {
+            reload();
+        }, [])
+    );
 
     return (
         <View style={{ flex: 1, padding: 16 }}>

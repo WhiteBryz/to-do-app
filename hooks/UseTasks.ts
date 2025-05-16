@@ -1,6 +1,6 @@
 import { getAllTasks } from '@/store/taskStore';
 import { Task } from '@/types/task';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const useTasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -12,9 +12,7 @@ export const useTasks = () => {
         setLoading(false);
     };
 
-    useEffect(() => {
-        loadTasks();
-    }, []);
-
-    return { tasks, loading, reload: loadTasks };
+    return {
+        tasks, loading, reload: loadTasks
+    };
 };

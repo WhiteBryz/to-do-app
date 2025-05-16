@@ -1,4 +1,3 @@
-import { useTasks } from '@/hooks/UseTasks';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { PriorityLevel, ReminderOption, Task } from '@/types/task';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -11,8 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewTaskModal() {
   const router = useRouter();
-  const { reload } = useTasks();
-
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
@@ -46,7 +43,6 @@ export default function NewTaskModal() {
     };
 
     await addTaskStorage(newTask);
-    await reload();
     router.back();
   };
 
