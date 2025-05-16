@@ -53,16 +53,18 @@ export default function HomeScreen() {
             <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
 
             {/* Filtros con chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
-                {filters.map(f => (
-                    <ChipFilter
-                        key={f.value}
-                        label={f.label}
-                        selected={filter === f.value}
-                        onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
-                    />
-                ))}
-            </ScrollView>
+            <View style={{height: "auto", marginBottom: 10}}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
+                    {filters.map(f => (
+                        <ChipFilter
+                            key={f.value}
+                            label={f.label}
+                            selected={filter === f.value}
+                            onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
+                        />
+                    ))}
+                </ScrollView>
+            </View>
 
             {/* Lista de tareas filtradas */}
             <ScrollView style={{ flex: 1 }}>
