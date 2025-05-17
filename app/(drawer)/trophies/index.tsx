@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useTrophies } from '@/hooks/useTrophies';
+import { resetUserStats } from '@/store/trophiesStore';
 
 export default function TrophyScreen() {
   const { trophies } = useTrophies();
@@ -11,6 +12,14 @@ export default function TrophyScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <Button
+        title="Reiniciar progreso de trofeos"
+        onPress={async () => {
+          await resetUserStats();
+          console.log('Estadísticas reiniciadas');
+        }}
+        color="#4caf50"
+      />
       <Text style={styles.header}>
         Trofeos desbloqueados: {unlocked.length} / {trophies.length}
       </Text>

@@ -10,7 +10,7 @@ import { Link, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
-
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -38,6 +38,9 @@ export default function HomeScreen() {
             if (task) {
                 await updateTask(task)
             }
+            const stats = await getUserStats();
+            await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
+            await evaluateTrophies();
         } catch (error) {
             console.error("Error al actualizar la tarea", error);
         }
