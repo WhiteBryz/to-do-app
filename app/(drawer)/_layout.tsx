@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import './debug';
+import '../../utils/debug';
 
 export default function DrawerLayout() {
   return (

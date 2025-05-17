@@ -52,6 +52,7 @@ export const evaluateTrophies = async (): Promise<Trophy[]> => {
     const previouslyUnlockedRaw = await AsyncStorage.getItem('unlockedTrophies');
     const previouslyUnlocked = previouslyUnlockedRaw ? JSON.parse(previouslyUnlockedRaw) : [];
 
+    //const newUnlocks = unlockedNow;
     const newUnlocks = unlockedNow.filter(t => !previouslyUnlocked.includes(t.id));
 
     if (newUnlocks.length > 0) {
