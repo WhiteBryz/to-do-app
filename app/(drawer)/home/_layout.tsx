@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import '@/utils/debug';
 
 export default function HomeLayout() {
   return (

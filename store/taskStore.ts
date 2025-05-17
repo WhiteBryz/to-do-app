@@ -1,3 +1,4 @@
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 import { Task } from '@/types/task';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -16,6 +17,9 @@ export const addTask = async (task: Task) => {
   const tasks = await getAllTasks();
   tasks.push(task);
   await saveAllTasks(tasks);
+  const stats = await getUserStats();
+  await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
+  await evaluateTrophies();
 };
 
 export const updateTask = async (updatedTask: Task) => {
