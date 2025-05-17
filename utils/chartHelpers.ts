@@ -15,11 +15,6 @@ export function getMonthlyProgress(tasks: Task[]): number {
   return monthTasks.length ? (completed / monthTasks.length) * 100 : 0;
 }
 
-export function getProductivity(tasks: Task[]): number {
-  const completed = tasks.filter((t) => t.completed).length;
-  return tasks.length ? (completed / tasks.length) * 100 : 0;
-}
-
 export function getMostProductiveDay(tasks: Task[]): string {
   const completedTasks = tasks.filter((t) => t.completed);
   const daysCount = completedTasks.reduce((acc, task) => {
