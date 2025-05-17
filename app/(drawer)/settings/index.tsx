@@ -6,8 +6,7 @@ import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 export default function Settings() {
   const router = useRouter();
@@ -31,6 +30,15 @@ export default function Settings() {
     >
       <Text style={[styles.header, { color: theme.text }]}>Configuración</Text>
 
+      {/* Botón para abrir el modal de perfil */}
+<Pressable
+  style={[styles.profileButton, { backgroundColor: theme.primary }]}
+  onPress={() => router.push('../../modals/profile')}
+>
+  <Text style={styles.profileButtonText}>Editar perfil</Text>
+</Pressable>
+
+      {/* Opciones de configuración */}
       <SettingSwitch
         label="Modo oscuro"
         value={darkMode}
@@ -51,7 +59,7 @@ export default function Settings() {
           const message = val
             ? 'Shhh... tus notificaciones están tomando una siesta.'
             : '¡Tus notificaciones están despiertas y listas para molestar!';
-            playSound(tickSound);
+          playSound(tickSound);
           toast.showToast(title, message);
         }}
         theme={theme}
@@ -72,6 +80,7 @@ export default function Settings() {
         }}
         theme={theme}
       />
+
       <CustomToast
         visible={toast.visible}
         title={toast.title}
@@ -118,5 +127,15 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+  },
+  profileButton: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 24,
+    alignSelf: 'flex-start',
+  },
+  profileButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

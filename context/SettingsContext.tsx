@@ -3,9 +3,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Settings = {
+  darkMode: boolean;
   muteSounds: boolean;
   muteNotifications: boolean;
-  darkMode: boolean;
+  offlineMode: boolean;
+  username: string;
+  profileColor: string;
 };
 
 type SettingsContextType = Settings & {
@@ -13,42 +16,34 @@ type SettingsContextType = Settings & {
 };
 
 const defaultSettings: Settings = {
+  darkMode: false,
   muteSounds: false,
   muteNotifications: false,
-  darkMode: false,
+  offlineMode: false,
+  username: 'Usuario',
+  profileColor: '#6200EE',
 };
 
 const SettingsContext = createContext<SettingsContextType>({
   ...defaultSettings,
   setSetting: () => {},
 });
+
 export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
 
-  // Leer al inicio
   useEffect(() => {
     const load = async () => {
-      try {
-        const raw = await AsyncStorage.getItem('appSettings');
-        if (raw) {
-          setSettings(JSON.parse(raw));
-        }
-      } catch (err) {
-        console.log('Error cargando configuración', err);
-      }
+      const raw = await AsyncStorage.getItem('appSettings');
+      if (raw) setSettings(JSON.parse(raw));
     };
     load();
   }, []);
 
-  // Guardar cuando cambia
   const setSetting = async <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const updated = { ...settings, [key]: value };
     setSettings(updated);
-    try {
-      await AsyncStorage.setItem('appSettings', JSON.stringify(updated));
-    } catch (err) {
-      console.log('Error guardando configuración', err);
-    }
+    await AsyncStorage.setItem('appSettings', JSON.stringify(updated));
   };
 
   return (
