@@ -1,5 +1,7 @@
+import clickSound from '@/assets/sounds/click.mp3';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useSound } from '@/hooks/useSound';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -16,6 +18,7 @@ export default function ProfileModal() {
   const theme = useTheme();
   const router = useRouter();
   const [hexInput, setHexInput] = useState(profileColor);
+  const { playSound } = useSound();
 
   useEffect(() => {
     setHexInput(profileColor);
@@ -28,9 +31,12 @@ return (
         name="arrow-back"
         size={28}
         color={theme.text}
-        onPress={() => router.replace('/(drawer)/settings')}
-        style={styles.backIcon}
-      />
+            onPress={async () => {
+        await playSound(clickSound);
+        router.replace('/(drawer)/settings');
+    }}
+            style={styles.backIcon}
+          />
 
       <Text style={[styles.header, { color: theme.text }]}>Editar perfil</Text>
 
