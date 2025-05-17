@@ -19,7 +19,8 @@ export default function formatCustomDateTime(isoDateStr:string,timeStr:string): 
 
   const formatter = new Intl.DateTimeFormat("en-US", {
     weekday: "short", // "Thu"
-    month: "numeric", // "5"
+    month: "short", // "May"
+    day: "numeric", // "12"
     year: "numeric", // "2025"
     hour: "numeric", // "6"
     minute: "2-digit", // "32"
@@ -30,10 +31,11 @@ export default function formatCustomDateTime(isoDateStr:string,timeStr:string): 
   
   const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
   const month = parts.find((p) => p.type === "month")?.value ?? "";
+  const day = parts.find((p) => p.type === "day")?.value ?? "";
   const year = parts.find((p) => p.type === "year")?.value ?? "";
   const hour = parts.find((p) => p.type === "hour")?.value ?? "";
   const minute = parts.find((p) => p.type === "minute")?.value ?? "";
   const dayPeriod = parts.find((p) => p.type === "dayPeriod")?.value ?? "";
 
-  return `${weekday}, ${month}, ${year}, ${hour}:${minute} ${dayPeriod}`;
+  return `${weekday}, ${month} ${day}, ${year}, ${hour}:${minute} ${dayPeriod}`;
 }
