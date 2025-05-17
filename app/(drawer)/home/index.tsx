@@ -4,15 +4,15 @@ import TaskComponent from "@/components/Task";
 import TextDivider from "@/components/TextDivider";
 import { useTasks } from '@/hooks/UseTasks';
 import { updateTask } from "@/store/taskStore";
+import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { Link, useFocusEffect } from 'expo-router';
+import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
-import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -22,7 +22,7 @@ export default function HomeScreen() {
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
-
+    const router = useRouter();
     const filteredTasksCompleted = filteredTasks.filter(task => task.completed === true)
     const filteredTasksIncompleted = filteredTasks.filter(task => task.completed === false)
     const hasTasksCompleted = filteredTasksCompleted.length > 0;
@@ -61,7 +61,8 @@ export default function HomeScreen() {
         month: 'Tareas para este mes',
         later: 'Tareas para después',
     };
-    // console.log(filteredTasks)
+    
+    // console.log(Dimensions.get('window').width * 0.5)
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
@@ -133,19 +134,20 @@ export default function HomeScreen() {
             </ScrollView>
 
             {/* Botón flotante para nueva tarea */}
-            <Link href="../modals/newTask" asChild>
+            
                 <FAB
                     icon={props => <Icon name="plus" {...props} />}
                     color="white"
+                    onPress={()=>router.push("/modals/newTask")}
                     style={{
                         position: 'absolute',
                         backgroundColor: "#6200ee",
                         borderRadius: 50,
-                        bottom: 40,
-                        right: Dimensions.get('window').width * 0.5 - 30,
+                        bottom: 16,
+                        left: Dimensions.get('window').width - 56 - 16,
                     }}
-                />
-            </Link>
+                /> 
+           
         </View>
     );
 }
