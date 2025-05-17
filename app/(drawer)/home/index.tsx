@@ -50,11 +50,19 @@ export default function HomeScreen() {
             console.error("Error al actualizar la tarea", error);
         }
     };
+
+    // Definición de los encabezados personalizados para cada filtro
+    const customHeaders: Record<Exclude<FilterOption, null>, string> = {
+        today: 'Tareas para hoy',
+        week: 'Tareas para esta semana',
+        month: 'Tareas para este mes',
+        later: 'Tareas para después',
+    };
     // console.log(filteredTasks)
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
-                {filters.find(f => f.value === filter)?.label}
+                {filter ? customHeaders[filter] : 'Todas las tareas'}
             </Text>
 
             {/* Barra de progreso */}
@@ -119,7 +127,7 @@ export default function HomeScreen() {
                         </Link>
                     </MotiView>
                 ))}
-            </ScrollView> 
+            </ScrollView>
 
             {/* Botón flotante para nueva tarea */}
             <Link href="../modals/newTask" asChild>
