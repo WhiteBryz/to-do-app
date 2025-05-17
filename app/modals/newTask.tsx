@@ -1,10 +1,12 @@
+import { useTheme } from '@/context/ThemeContext';
+import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { PriorityLevel, ReminderOption, Task } from '@/types/task';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { HStack } from "@react-native-material/core";
+import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, RadioButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,6 +22,9 @@ export default function NewTaskModal() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminder, setReminder] = useState<ReminderOption>('10min');
   const [repeat, setRepeat] = useState(false);
+  const { playSound } = useSound()
+  const theme = useTheme()
+
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -46,90 +51,98 @@ export default function NewTaskModal() {
     router.back();
   };
 
+  const canSaveNewTask = title.length > 3 ? true : false;
+  console.log(canSaveNewTask);
+
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={styles.container}>
         <HStack style={styles.topBar}>
-          <Button icon="arrow-left" mode="text" onPress={() => router.back()}>Volver</Button>
-          <Text variant="titleLarge">Agregar nueva tarea</Text>
+          <Text style={{ color: theme.text, marginVertical: 20, fontWeight: 800 }} variant="titleLarge">Agregar nueva tarea</Text>
         </HStack>
+        <VStack>
+          <TextInput label="Título" value={title} onChangeText={setTitle} style={[styles.input, { backgroundColor: theme.background, color: theme.text }]} />
+          <TextInput label="Descripción" value={description} onChangeText={setDescription} multiline numberOfLines={3} style={styles.input} />
 
-        <TextInput label="Título" value={title} onChangeText={setTitle} style={styles.input} />
-        <TextInput label="Descripción" value={description} onChangeText={setDescription} multiline numberOfLines={3} style={styles.input} />
+          <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
+            Seleccionar fecha: {date.toLocaleDateString()}
+          </Button>
 
-        <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
-          Seleccionar fecha: {date.toLocaleDateString()}
-        </Button>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false); // ciérralo primero
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false); // ciérralo primero
+                if (event.type === 'set' && selectedDate) {
+                  setDate(selectedDate);
+                }
+              }}
+            />
+          )}
 
-              if (event.type === 'set' && selectedDate) {
-                setDate(selectedDate);
-              }
-            }}
+          <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
+            Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Button>
+
+          {showTimePicker && (
+            <DateTimePicker
+              value={time}
+              mode="time"
+              display="default"
+              onChange={(event, selectedTime) => {
+                setShowTimePicker(false); // ciérralo primero
+
+                if (event.type === 'set' && selectedTime) {
+                  setTime(selectedTime);
+                }
+              }}
+            />
+          )}
+
+          <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
+          <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
+            <RadioButton.Item label="5 min antes" value="5min" />
+            <RadioButton.Item label="10 min antes" value="10min" />
+            <RadioButton.Item label="30 min antes" value="30min" />
+            <RadioButton.Item label="1 día antes" value="1day" />
+          </RadioButton.Group>
+
+          <View style={styles.repeat}>
+            <Checkbox
+              status={repeat ? 'checked' : 'unchecked'}
+              onPress={() => setRepeat(!repeat)}
+            />
+            <Text>Repetir tarea</Text>
+          </View>
+
+          <Text variant="labelLarge" style={{ marginTop: 16 }}>Prioridad</Text>
+          <RadioButton.Group onValueChange={(value) => setPriority(value as PriorityLevel)} value={priority}>
+            <RadioButton.Item label="Baja" value="low" />
+            <RadioButton.Item label="Media" value="medium" />
+            <RadioButton.Item label="Alta" value="high" />
+          </RadioButton.Group>
+
+          <TextInput
+            label="Nota (opcional)"
+            value={note}
+            onChangeText={setNote}
+            multiline
+            numberOfLines={2}
+            style={styles.input}
           />
-        )}
+          <HStack style={{ flex: 1, marginTop: 10 }}>
+            <Pressable style={[styles.pressableButton, {}]} onPress={() => router.back()}>
+              <Text style={[styles.textButton, { color: theme.text }]}>Cancelar</Text>
+            </Pressable>
 
-        <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
-          Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Button>
-
-        {showTimePicker && (
-          <DateTimePicker
-            value={time}
-            mode="time"
-            display="default"
-            onChange={(event, selectedTime) => {
-              setShowTimePicker(false); // ciérralo primero
-
-              if (event.type === 'set' && selectedTime) {
-                setTime(selectedTime);
-              }
-            }}
-          />
-        )}
-
-        <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
-        <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
-          <RadioButton.Item label="5 min antes" value="5min" />
-          <RadioButton.Item label="10 min antes" value="10min" />
-          <RadioButton.Item label="30 min antes" value="30min" />
-          <RadioButton.Item label="1 día antes" value="1day" />
-        </RadioButton.Group>
-
-        <View style={styles.repeat}>
-          <Checkbox
-            status={repeat ? 'checked' : 'unchecked'}
-            onPress={() => setRepeat(!repeat)}
-          />
-          <Text>Repetir tarea</Text>
-        </View>
-
-        <Text variant="labelLarge" style={{ marginTop: 16 }}>Prioridad</Text>
-        <RadioButton.Group onValueChange={(value) => setPriority(value as PriorityLevel)} value={priority}>
-          <RadioButton.Item label="Baja" value="low" />
-          <RadioButton.Item label="Media" value="medium" />
-          <RadioButton.Item label="Alta" value="high" />
-        </RadioButton.Group>
-
-        <TextInput
-          label="Nota (opcional)"
-          value={note}
-          onChangeText={setNote}
-          multiline
-          numberOfLines={2}
-          style={styles.input}
-        />
-
-        <Button mode="contained" onPress={handleSave} style={{ marginTop: 16 }}>
-          Guardar Tarea
-        </Button>
+            <Pressable disabled={canSaveNewTask} style={[styles.pressableButton, {}]} onPress={handleSave}>
+              <Text style={[styles.textButton, { color: theme.text, opacity: canSaveNewTask ? 1 : 0.5 }]}>Guardar Tarea</Text>
+            </Pressable>
+          </HStack>
+        </VStack>
       </ScrollView>
     </SafeAreaView>
   );
@@ -151,4 +164,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  backIcon: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  textButton: {
+    fontSize: 20,
+    fontWeight: 700
+  },
+  pressableButton: {
+    width: 'auto',
+    height: 70,
+    alignContent: 'center',
+    flex: 0.5,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 });
