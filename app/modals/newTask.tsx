@@ -52,7 +52,6 @@ export default function NewTaskModal() {
   };
 
   const canSaveNewTask = title.length > 3 ? true : false;
-  console.log(canSaveNewTask);
 
   return (
     <SafeAreaView>
