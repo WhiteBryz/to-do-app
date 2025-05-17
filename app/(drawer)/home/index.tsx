@@ -1,6 +1,7 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
 import TaskComponent from "@/components/Task";
+import TextDivider from "@/components/TextDivider";
 import { useTasks } from '@/hooks/UseTasks';
 import { updateTask } from "@/store/taskStore";
 import { FilterOption, Task, filters } from '@/types/task';
@@ -19,6 +20,12 @@ export default function HomeScreen() {
     const filteredTasks = filter
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
+
+
+    const filteredTasksCompleted = filteredTasks.filter(task => task.completed === true)
+    const filteredTasksIncompleted = filteredTasks.filter(task => task.completed === false)
+    const hasTasksCompleted = filteredTasksCompleted.length > 0;
+    const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
 
     useFocusEffect(
         useCallback(() => {
@@ -66,14 +73,15 @@ export default function HomeScreen() {
                 </ScrollView>
             </View>
 
-            {/* Lista de tareas filtradas */}
+            {/* Lista de tareas filtradas y separadas */}
             <ScrollView style={{ flex: 1 }}>
                 {filteredTasks.length === 0 && (
                     <Text style={{ textAlign: 'center', marginTop: 32, fontStyle: 'italic' }}>
                         No hay tareas para esta categoría.
                     </Text>
                 )}
-                {filteredTasks.map((task: Task) => (
+                <TextDivider showComponente={hasTasksIncompleted} text="Pendientes" />
+                {filteredTasksIncompleted.map((task: Task) => (
                     <Link
                         key={task.id}
                         href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
@@ -84,7 +92,19 @@ export default function HomeScreen() {
                         </Pressable>
                     </Link>
                 ))}
-            </ScrollView>
+                <TextDivider showComponente={hasTasksCompleted} text="Completadas" />
+                {filteredTasksCompleted.map((task: Task) => (
+                    <Link
+                        key={task.id}
+                        href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                        asChild
+                    >
+                        <Pressable>
+                            <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                        </Pressable>
+                    </Link>
+                ))}
+            </ScrollView> 
 
             {/* Botón flotante para nueva tarea */}
             <Link href="../modals/newTask" asChild>
