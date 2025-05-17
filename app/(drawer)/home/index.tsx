@@ -1,72 +1,134 @@
 import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
+import TaskComponent from "@/components/Task";
+import TextDivider from "@/components/TextDivider";
 import { useTasks } from '@/hooks/UseTasks';
+import { updateTask } from "@/store/taskStore";
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { Link } from 'expo-router';
-import { useState } from 'react';
+import { Link, useFocusEffect } from 'expo-router';
+import { MotiView } from 'moti';
+import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function HomeScreen() {
-    const { tasks } = useTasks();
+    const { tasks, reload, setTasks } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
-
     const completedTasks = tasks.filter(t => t.completed).length;
-
     const filteredTasks = filter
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
+
+    const filteredTasksCompleted = filteredTasks.filter(task => task.completed === true)
+    const filteredTasksIncompleted = filteredTasks.filter(task => task.completed === false)
+    const hasTasksCompleted = filteredTasksCompleted.length > 0;
+    const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
+
+    useFocusEffect(
+        useCallback(() => {
+            reload();
+        }, [])
+    );
+
+    // Función para actualizar una tarea en el estado
+    const toggleCompleted = async (id: string) => {
+        try {
+            const updatedTasks = tasks.map(task =>
+                task.id === id ? { ...task, completed: !task.completed } : task
+            );
+            setTasks(updatedTasks);
+
+            const task = updatedTasks.find(task => task.id === id)
+            if (task) {
+                await updateTask(task)
+            }
+            const stats = await getUserStats();
+            await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
+            await evaluateTrophies();
+        } catch (error) {
+            console.error("Error al actualizar la tarea", error);
+        }
+    };
+
+    // Definición de los encabezados personalizados para cada filtro
+    const customHeaders: Record<Exclude<FilterOption, null>, string> = {
+        today: 'Tareas para hoy',
+        week: 'Tareas para esta semana',
+        month: 'Tareas para este mes',
+        later: 'Tareas para después',
+    };
+    // console.log(filteredTasks)
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
-                {filters.find(f => f.value === filter)?.label}
+                {filter ? customHeaders[filter] : 'Todas las tareas'}
             </Text>
 
             {/* Barra de progreso */}
-            <ProgressBarComponent completed={completedTasks} total={tasks.length} />
+            <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
 
             {/* Filtros con chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
-                {filters.map(f => (
-                    <ChipFilter
-                        key={f.value}
-                        label={f.label}
-                        selected={filter === f.value}
-                        onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
-                    />
-                ))}
-            </ScrollView>
+            <View style={{ height: "auto", marginBottom: 10 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
+                    {filters.map(f => (
+                        <ChipFilter
+                            key={f.value}
+                            label={f.label}
+                            selected={filter === f.value}
+                            onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
+                        />
+                    ))}
+                </ScrollView>
+            </View>
 
-            {/* Lista de tareas filtradas */}
+            {/* Lista de tareas filtradas y separadas */}
             <ScrollView style={{ flex: 1 }}>
                 {filteredTasks.length === 0 && (
                     <Text style={{ textAlign: 'center', marginTop: 32, fontStyle: 'italic' }}>
                         No hay tareas para esta categoría.
                     </Text>
                 )}
-                {filteredTasks.map((task: Task) => (
-                    <Link
+                <TextDivider showComponente={hasTasksIncompleted} text="Pendientes" />
+                {filteredTasksIncompleted.map((task: Task) => (
+                    <MotiView
+                        from={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ type: 'timing' }}
                         key={task.id}
-                        href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                        asChild
                     >
-                        <Pressable
-                            style={{
-                                padding: 16,
-                                backgroundColor: task.completed ? '#c8e6c9' : '#f5f5f5',
-                                borderRadius: 8,
-                                marginBottom: 8,
-                            }}
+                        <Link
+                            key={task.id}
+                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                            asChild
                         >
-                            <Text style={{ fontWeight: 'bold' }}>{task.title}</Text>
-                            <Text style={{ color: '#666' }}>
-                                {task.date.split('T')[0]} - {task.time}
-                            </Text>
-                        </Pressable>
-                    </Link>
+                            <Pressable>
+                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                            </Pressable>
+                        </Link>
+                    </MotiView>
+                ))}
+                <TextDivider showComponente={hasTasksCompleted} text="Completadas" />
+                {filteredTasksCompleted.map((task: Task) => (
+                    <MotiView
+                        from={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ type: 'timing' }}
+                        key={task.id}
+                    >
+                        <Link
+                            key={task.id}
+                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                            asChild
+                        >
+                            <Pressable>
+                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                            </Pressable>
+                        </Link>
+                    </MotiView>
                 ))}
             </ScrollView>
 

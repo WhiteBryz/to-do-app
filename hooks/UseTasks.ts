@@ -16,5 +16,5 @@ export const useTasks = () => {
         loadTasks();
     }, []);
 
-    return { tasks, loading, reload: loadTasks };
+    return { tasks, loading, reload: loadTasks, setTasks };
 };
