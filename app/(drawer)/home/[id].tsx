@@ -1,5 +1,6 @@
 import { deleteTask, findTaskById, updateTask } from '@/store/taskStore';
 import { PriorityLevel, ReminderOption, Task } from '@/types/task';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -114,178 +115,179 @@ export default function TaskDetail() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Título */}
-      <Text variant="titleMedium" style={styles.label}>Tarea</Text>
-      <TextInput
-        mode="outlined"
-        value={title}
-        onChangeText={setTitle}
-        style={(isEditing)?styles.input:styles.inputdisabled}
-        disabled={!isEditing}
-      />
-
-      {/* Descripción */}
-      <Text variant="titleMedium" style={styles.label}>Descripción</Text>
-      <TextInput
-        mode="outlined"
-        multiline
-        numberOfLines={3}
-        value={description}
-        onChangeText={setDescription}
-        style={(isEditing)?styles.input:styles.inputdisabled}
-        disabled={!isEditing}
-      />
-
-      {/* Fecha límite */}
-      <Text variant="titleMedium" style={styles.label}>Fecha límite</Text>
-      <Pressable style={(isEditing)?styles.input:styles.inputdisabled} disabled={!isEditing} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{formatDate(date)}</Text>
-      </Pressable>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (event.type === 'set' && selectedDate) {
-              setDate(selectedDate);
-            }
-          }}
-        />
-      )}
-
-      {/* Hora límite */}
-      <Text variant="titleMedium" style={styles.label}>Hora límite</Text>
-      <Pressable style={(isEditing)?styles.input:styles.inputdisabled} disabled={!isEditing} onPress={() => setShowTimePicker(true)}>
-        <Text style={styles.pickerText}>{time}</Text>
-      </Pressable>
-      {showTimePicker && (
-        <DateTimePicker
-          value={new Date(`1970-01-01T${time}:00`)}
-          mode="time"
-          display="default"
-          onChange={(event, selectedTime) => {
-            setShowTimePicker(false); // ciérralo primero
-
-            if (event.type === 'set' && selectedTime) {
-              setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5));
-            }
-          }}
-        />
-      )}
-
-      {/* Prioridad */}
-      <Text variant="titleMedium" style={styles.label}>Prioridad</Text>
-      <Button
-        mode={'contained'}
-        onPress={openPriorityModal}
-        style={styles.choiceBtn}
-        disabled={!isEditing}
-      >
-        {priorityLabels[priority]} {/* 👈 Mostrar la prioridad en español */}
-      </Button>
-
-      <Modal visible={showPriorityModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.dialogContent}>
-            <Text style={styles.dialogTitle}>Selecciona la prioridad</Text>
-
-            <RadioButton.Group
-              onValueChange={(newValue) => setTempPriority(newValue as PriorityLevel)}
-              value={tempPriority}
-            >
-              {(['low', 'medium', 'high'] as PriorityLevel[]).map(level => (
-                <RadioButton.Item
-                  key={level}
-                  labelStyle={styles.radioLabel}
-                  label={priorityLabels[level]}
-                  value={level}
-                  mode="android"
-                />
-              ))}
-            </RadioButton.Group>
-
-            <View style={styles.dialogActions}>
-              <Button
-                onPress={() => setShowPriorityModal(false)}
-                compact
-              >
-                Cancelar
-              </Button>
-              <Button
-                onPress={() => {
-                  setPriority(tempPriority);
-                  setShowPriorityModal(false);
-                }}
-                compact
-              >
-                Aceptar
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Recordatorio */}
-      <Text variant="titleMedium" style={styles.label}>Recordatorio</Text>
-      <Button
-        mode="contained"
-        onPress={() => {
-          setTempReminder(reminder);
-          setShowReminderModal(true);
-        }}
-        style={styles.choiceBtn}
-        disabled={!isEditing}
-      >
-        {reminderLabels[reminder]}
-      </Button>
-      <Modal visible={showReminderModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.dialogContent}>
-            <Text style={styles.dialogTitle}>Selecciona el recordatorio</Text>
-            <RadioButton.Group
-              onValueChange={(value) => setTempReminder(value as typeof reminder)}
-              value={tempReminder}
-            >
-              {Object.entries(reminderLabels).map(([value, label]) => (
-                <RadioButton.Item
-                  key={value}
-                  label={label}
-                  value={value}
-                  mode="android"
-                  labelStyle={styles.radioLabel}
-                />
-              ))}
-            </RadioButton.Group>
-            <View style={styles.dialogActions}>
-              <Button onPress={() => setShowReminderModal(false)}>Cancelar</Button>
-              <Button onPress={() => {
-                setReminder(tempReminder);
-                setShowReminderModal(false);
-              }}>
-                Aceptar
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-
-
-
-      {/* Repetición */}
-      <View style={styles.switchRow}>
-        <Text variant="titleMedium">Repetir</Text>
-        <Switch
-          value={repeat}
-          onValueChange={setRepeat}
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 100 }]}>
+        {/* Título */}
+        <Text variant="titleMedium" style={styles.label}>Tarea</Text>
+        <TextInput
+          mode="outlined"
+          value={title}
+          onChangeText={setTitle}
+          style={(isEditing) ? styles.input : styles.inputdisabled}
           disabled={!isEditing}
-          thumbColor={repeat ? '#6200ee' : '#f4f3f4'}
         />
-      </View>
-      {/* TODO: Implementar repetición de tareas en el newTask para habilitar el modal
+
+        {/* Descripción */}
+        <Text variant="titleMedium" style={styles.label}>Descripción</Text>
+        <TextInput
+          mode="outlined"
+          multiline
+          numberOfLines={3}
+          value={description}
+          onChangeText={setDescription}
+          style={(isEditing) ? styles.input : styles.inputdisabled}
+          disabled={!isEditing}
+        />
+
+        {/* Fecha límite */}
+        <Text variant="titleMedium" style={styles.label}>Fecha límite</Text>
+        <Pressable style={(isEditing) ? styles.simulatedInput : styles.simulatedInputDisabled} disabled={!isEditing} onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.pickerText}>{formatDate(date)}</Text>
+        </Pressable>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (event.type === 'set' && selectedDate) {
+                setDate(selectedDate);
+              }
+            }}
+          />
+        )}
+
+        {/* Hora límite */}
+        <Text variant="titleMedium" style={styles.label}>Hora límite</Text>
+        <Pressable style={(isEditing) ? styles.simulatedInput : styles.simulatedInputDisabled} disabled={!isEditing} onPress={() => setShowTimePicker(true)}>
+          <Text style={styles.pickerText}>{time}</Text>
+        </Pressable>
+        {showTimePicker && (
+          <DateTimePicker
+            value={new Date(`1970-01-01T${time}:00`)}
+            mode="time"
+            display="default"
+            onChange={(event, selectedTime) => {
+              setShowTimePicker(false); // ciérralo primero
+
+              if (event.type === 'set' && selectedTime) {
+                setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5));
+              }
+            }}
+          />
+        )}
+
+        {/* Prioridad */}
+        <Text variant="titleMedium" style={styles.label}>Prioridad</Text>
+        <Button
+          mode={'contained'}
+          onPress={openPriorityModal}
+          style={styles.choiceBtn}
+          disabled={!isEditing}
+        >
+          {priorityLabels[priority]} {/* 👈 Mostrar la prioridad en español */}
+        </Button>
+
+        <Modal visible={showPriorityModal} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.dialogContent}>
+              <Text style={styles.dialogTitle}>Selecciona la prioridad</Text>
+
+              <RadioButton.Group
+                onValueChange={(newValue) => setTempPriority(newValue as PriorityLevel)}
+                value={tempPriority}
+              >
+                {(['low', 'medium', 'high'] as PriorityLevel[]).map(level => (
+                  <RadioButton.Item
+                    key={level}
+                    labelStyle={styles.radioLabel}
+                    label={priorityLabels[level]}
+                    value={level}
+                    mode="android"
+                  />
+                ))}
+              </RadioButton.Group>
+
+              <View style={styles.dialogActions}>
+                <Button
+                  onPress={() => setShowPriorityModal(false)}
+                  compact
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onPress={() => {
+                    setPriority(tempPriority);
+                    setShowPriorityModal(false);
+                  }}
+                  compact
+                >
+                  Aceptar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Recordatorio */}
+        <Text variant="titleMedium" style={styles.label}>Recordatorio</Text>
+        <Button
+          mode="contained"
+          onPress={() => {
+            setTempReminder(reminder);
+            setShowReminderModal(true);
+          }}
+          style={styles.choiceBtn}
+          disabled={!isEditing}
+        >
+          {reminderLabels[reminder]}
+        </Button>
+        <Modal visible={showReminderModal} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.dialogContent}>
+              <Text style={styles.dialogTitle}>Selecciona el recordatorio</Text>
+              <RadioButton.Group
+                onValueChange={(value) => setTempReminder(value as typeof reminder)}
+                value={tempReminder}
+              >
+                {Object.entries(reminderLabels).map(([value, label]) => (
+                  <RadioButton.Item
+                    key={value}
+                    label={label}
+                    value={value}
+                    mode="android"
+                    labelStyle={styles.radioLabel}
+                  />
+                ))}
+              </RadioButton.Group>
+              <View style={styles.dialogActions}>
+                <Button onPress={() => setShowReminderModal(false)}>Cancelar</Button>
+                <Button onPress={() => {
+                  setReminder(tempReminder);
+                  setShowReminderModal(false);
+                }}>
+                  Aceptar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+
+
+
+        {/* Repetición */}
+        <View style={styles.switchRow}>
+          <Text variant="titleMedium">Repetir</Text>
+          <Switch
+            value={repeat}
+            onValueChange={setRepeat}
+            disabled={!isEditing}
+            thumbColor={repeat ? '#6200ee' : '#f4f3f4'}
+          />
+        </View>
+        {/* TODO: Implementar repetición de tareas en el newTask para habilitar el modal
       <Text variant="titleMedium" style={styles.label}>Repetición</Text>
       <Button
         mode="contained"
@@ -329,47 +331,71 @@ export default function TaskDetail() {
   </Modal>
 
       */}
-      {/* Nota */}
-      <Text variant="titleMedium" style={styles.label}>Notas</Text>
-      <TextInput
-        mode="outlined"
-        multiline
-        numberOfLines={4}
-        value={note}
-        onChangeText={setNote}
-        style={(isEditing)?styles.input:styles.inputdisabled}
-        disabled={!isEditing}
-      />
+        {/* Nota */}
+        <Text variant="titleMedium" style={styles.label}>Notas</Text>
+        <TextInput
+          mode="outlined"
+          multiline
+          numberOfLines={4}
+          value={note}
+          onChangeText={setNote}
+          style={(isEditing) ? styles.input : styles.inputdisabled}
+          disabled={!isEditing}
+        />
 
-      {/* Botones */}
-      <View style={styles.buttonRow}>
-        <Button mode="outlined" textColor="red" onPress={handleDelete} style={styles.button}>Eliminar</Button>
-        <Button
-          mode="contained"
+        {/* Última modificación */}
+        <Text variant="bodySmall" style={styles.updatedAt}>
+          Última modificación: {new Date(task.updatedAt).toLocaleDateString('es-MX', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+          })}
+        </Text>
+      </ScrollView >
+
+      {/* Barra de navegación inferior */}
+      <View style={styles.bottomBar}>
+        <Pressable style={styles.navItem} onPress={() => {
+          if (!task) return;
+          const updatedTask: Task = {
+            ...task,
+            completed: !task.completed,
+            updatedAt: new Date().toISOString(),
+          };
+          updateTask(updatedTask);
+          router.back();
+        }}>
+          
+          <MaterialCommunityIcons name={(task.completed)?'checkbox-marked-circle':'check-circle-outline'} size={24} color="#fff" />
+          <Text style={styles.navText}>{(task.completed)?'Marcar como pendiente':'Marcar como completada'}</Text>
+        </Pressable>
+
+        <Pressable style={styles.navItem} onPress={handleDelete}>
+          <MaterialCommunityIcons name='delete-outline' size={24} color="#fff" />
+          <Text style={styles.navText}>Eliminar</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.navItem}
           onPress={() => {
-            if (isEditing) {
-              handleSave(); // Guarda cambios
-            }
-            setIsEditing(!isEditing); // Cambia entre modos
+            if (isEditing) handleSave();
+            else setIsEditing(true);
           }}
-          style={styles.button}>
-          {isEditing ? 'Guardar' : 'Editar'}
-        </Button>
-
+        >
+          <MaterialCommunityIcons name={isEditing ? 'content-save-outline' : 'pencil-outline'} size={24} color="#fff" />
+          <Text style={styles.navText}>{isEditing ? 'Guardar' : 'Editar'}</Text>
+        </Pressable>
       </View>
-
-      {/* Última modificación */}
-      <Text variant="bodySmall" style={styles.updatedAt}>
-        Última modificación: {new Date(task.updatedAt).toLocaleDateString('es-MX', {
-          year: 'numeric', month: '2-digit', day: '2-digit'
-        })}
-      </Text>
-    </ScrollView >
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   input: {
+    borderColor: '#6A6961',
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    marginBottom: 12,
+  },
+  simulatedInput: {
     padding: 5,
     borderWidth: 1,
     borderColor: '#6A6961',
@@ -378,6 +404,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   inputdisabled: {
+    backgroundColor: '#E5E5E5',
+    borderColor: '#d0d0d0',
+    borderRadius: 6,
+  },
+  simulatedInputDisabled: {
     padding: 5,
     borderWidth: 1,
     backgroundColor: '#E5E5E5',
@@ -478,5 +509,31 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     textAlign: 'center',
+  },
+  bottomBar: {
+    position: 'absolute',
+    paddingBottom:30,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#6200ea', // púrpura como en la imagen
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+  },
+
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+
+  navText: {
+    color: '#fff',
+    fontSize: 12,
+    marginTop: 4,
   },
 });
