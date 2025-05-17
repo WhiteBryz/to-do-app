@@ -25,6 +25,7 @@ export default function TaskDetail() {
   const [reminder, setReminder] = useState<ReminderOption>('10min');
   const [tempReminder, setTempReminder] = useState(reminder);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   //TODO: Implementar repetición de tareas en el newTask
   const [repeat, setRepeat] = useState(false);
   /*const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
@@ -40,7 +41,7 @@ export default function TaskDetail() {
     });
   // Abrir el modal y sincronizar el valor temporal
   const openPriorityModal = () => {
-    setTempPriority(priority); // copia el valor actual
+    setTempPriority(priority);
     setShowPriorityModal(true);
   }
   const priorityLabels: Record<PriorityLevel, string> = {
@@ -54,6 +55,7 @@ export default function TaskDetail() {
     '30min': '30 minutos antes',
     '1day': '1 día antes',
   };
+
   /*
   const repetitionLabels: Record<RepetitionOption, string> = {
     'none': 'No repetir',
@@ -119,7 +121,8 @@ export default function TaskDetail() {
         mode="outlined"
         value={title}
         onChangeText={setTitle}
-        style={styles.input}
+        style={(isEditing)?styles.input:styles.inputdisabled}
+        disabled={!isEditing}
       />
 
       {/* Descripción */}
@@ -130,12 +133,13 @@ export default function TaskDetail() {
         numberOfLines={3}
         value={description}
         onChangeText={setDescription}
-        style={styles.input}
+        style={(isEditing)?styles.input:styles.inputdisabled}
+        disabled={!isEditing}
       />
 
       {/* Fecha límite */}
       <Text variant="titleMedium" style={styles.label}>Fecha límite</Text>
-      <Pressable style={styles.pressable} onPress={() => setShowDatePicker(true)}>
+      <Pressable style={(isEditing)?styles.input:styles.inputdisabled} disabled={!isEditing} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.pickerText}>{formatDate(date)}</Text>
       </Pressable>
       {showDatePicker && (
@@ -154,23 +158,23 @@ export default function TaskDetail() {
 
       {/* Hora límite */}
       <Text variant="titleMedium" style={styles.label}>Hora límite</Text>
-      <Pressable style={styles.pressable} onPress={() => setShowTimePicker(true)}>
+      <Pressable style={(isEditing)?styles.input:styles.inputdisabled} disabled={!isEditing} onPress={() => setShowTimePicker(true)}>
         <Text style={styles.pickerText}>{time}</Text>
       </Pressable>
       {showTimePicker && (
-          <DateTimePicker
-            value={new Date(`1970-01-01T${time}:00`)}
-            mode="time"
-            display="default"
-            onChange={(event, selectedTime) => {
-              setShowTimePicker(false); // ciérralo primero
+        <DateTimePicker
+          value={new Date(`1970-01-01T${time}:00`)}
+          mode="time"
+          display="default"
+          onChange={(event, selectedTime) => {
+            setShowTimePicker(false); // ciérralo primero
 
-              if (event.type === 'set' && selectedTime) {
-                setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-              }
-            }}
-          />
-        )}
+            if (event.type === 'set' && selectedTime) {
+              setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5));
+            }
+          }}
+        />
+      )}
 
       {/* Prioridad */}
       <Text variant="titleMedium" style={styles.label}>Prioridad</Text>
@@ -178,6 +182,7 @@ export default function TaskDetail() {
         mode={'contained'}
         onPress={openPriorityModal}
         style={styles.choiceBtn}
+        disabled={!isEditing}
       >
         {priorityLabels[priority]} {/* 👈 Mostrar la prioridad en español */}
       </Button>
@@ -232,6 +237,7 @@ export default function TaskDetail() {
           setShowReminderModal(true);
         }}
         style={styles.choiceBtn}
+        disabled={!isEditing}
       >
         {reminderLabels[reminder]}
       </Button>
@@ -275,6 +281,8 @@ export default function TaskDetail() {
         <Switch
           value={repeat}
           onValueChange={setRepeat}
+          disabled={!isEditing}
+          thumbColor={repeat ? '#6200ee' : '#f4f3f4'}
         />
       </View>
       {/* TODO: Implementar repetición de tareas en el newTask para habilitar el modal
@@ -329,13 +337,25 @@ export default function TaskDetail() {
         numberOfLines={4}
         value={note}
         onChangeText={setNote}
-        style={styles.input}
+        style={(isEditing)?styles.input:styles.inputdisabled}
+        disabled={!isEditing}
       />
 
       {/* Botones */}
       <View style={styles.buttonRow}>
         <Button mode="outlined" textColor="red" onPress={handleDelete} style={styles.button}>Eliminar</Button>
-        <Button mode="contained" onPress={handleSave} style={styles.button}>Guardar</Button>
+        <Button
+          mode="contained"
+          onPress={() => {
+            if (isEditing) {
+              handleSave(); // Guarda cambios
+            }
+            setIsEditing(!isEditing); // Cambia entre modos
+          }}
+          style={styles.button}>
+          {isEditing ? 'Guardar' : 'Editar'}
+        </Button>
+
       </View>
 
       {/* Última modificación */}
@@ -349,11 +369,20 @@ export default function TaskDetail() {
 }
 
 const styles = StyleSheet.create({
-  pressable:{
-    padding: 10,
+  input: {
+    padding: 5,
     borderWidth: 1,
     borderColor: '#6A6961',
     backgroundColor: '#ffffff',
+    borderRadius: 6,
+    marginBottom: 12,
+  },
+  inputdisabled: {
+    padding: 5,
+    borderWidth: 1,
+    backgroundColor: '#E5E5E5',
+    color: '#d0d0d0',
+    borderColor: '#d0d0d0',
     borderRadius: 6,
     marginBottom: 12,
   },
@@ -413,7 +442,6 @@ const styles = StyleSheet.create({
   },
   container: { padding: 20 },
   label: { marginTop: 16, marginBottom: 4 },
-  input: { marginBottom: 12 },
   pickerText: {
     fontSize: 16,
     padding: 8,
