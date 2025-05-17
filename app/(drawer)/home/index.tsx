@@ -8,6 +8,7 @@ import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link, useFocusEffect } from 'expo-router';
+import { MotiView } from 'moti';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
@@ -60,7 +61,7 @@ export default function HomeScreen() {
             <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
 
             {/* Filtros con chips */}
-            <View style={{height: "auto", marginBottom: 10}}>
+            <View style={{ height: "auto", marginBottom: 10 }}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
                     {filters.map(f => (
                         <ChipFilter
@@ -82,27 +83,41 @@ export default function HomeScreen() {
                 )}
                 <TextDivider showComponente={hasTasksIncompleted} text="Pendientes" />
                 {filteredTasksIncompleted.map((task: Task) => (
-                    <Link
+                    <MotiView
+                        from={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ type: 'timing' }}
                         key={task.id}
-                        href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                        asChild
                     >
-                        <Pressable>
-                            <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
-                        </Pressable>
-                    </Link>
+                        <Link
+                            key={task.id}
+                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                            asChild
+                        >
+                            <Pressable>
+                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                            </Pressable>
+                        </Link>
+                    </MotiView>
                 ))}
                 <TextDivider showComponente={hasTasksCompleted} text="Completadas" />
                 {filteredTasksCompleted.map((task: Task) => (
-                    <Link
+                    <MotiView
+                        from={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ type: 'timing' }}
                         key={task.id}
-                        href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                        asChild
                     >
-                        <Pressable>
-                            <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
-                        </Pressable>
-                    </Link>
+                        <Link
+                            key={task.id}
+                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                            asChild
+                        >
+                            <Pressable>
+                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                            </Pressable>
+                        </Link>
+                    </MotiView>
                 ))}
             </ScrollView> 
 
