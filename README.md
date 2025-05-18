@@ -1,50 +1,89 @@
-# Welcome to your Expo app 👋
+# Crunch App - Gestor de Tareas y Productividad (TO-DO) 
+Crunch App es un prototipo de aplicación móvil construido con **Expo + React Native**. Permite crear, organizar, y dar seguimiento a tareas y medir la productividad. Este README documenta los pasos necesarios para clonar, instalar y ejecutar el proyecto.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+>**Materia:**Diseño y Evaluación de Interfaces de Usuario 6°F
+>**Institución:**Facultad de Telemática, Universidad de Colima
 
-## Get started
+## Dependencias principales
+Estas son las librerías y frameworks clave utilizados en este proyecto:
 
-1. Install dependencies
+### Core React Native + Expo
+| Paquete | Versión | Descripción |
+|---------|---------|-------------|
+| **expo** | `~53.0.7` | Framework base multiplataforma |
+| **react‑native** | `0.79.2` | Motor UI nativo |
+| **react** | `19.0.0` | Biblioteca de UI declarativa |
+| **expo‑router** | `~5.0.5` | Enrutador estilo Next.js |
+| **react‑native‑paper** | `^5.14.1` | UI Material Design |
 
+### Navegación
+- `@react-navigation/native` `^7.1.6`  
+- `@react-navigation/drawer` `^7.3.11`  
+- `@react-navigation/bottom-tabs` `^7.3.10`  
+- `@react-navigation/elements` `^2.3.8`
+
+### Funcionalidad adicional
+- `@react-native-async-storage/async-storage` `2.1.2` – Storage local  
+- `@react-native-community/datetimepicker` `^8.3.0` – Picker nativo  
+- `react-native-toast-message` `^2.3.0` – Toasts  
+- `moti` `^0.30.0` – Animaciones declarativas  
+- `date-fns` `^4.1.0` – Utilidades de fecha  
+
+### Interfaz y UI
+- `@react-native-material/core` `^1.3.7`  
+- `@expo/vector-icons` `^14.1.0`  
+- `react-native-color-picker`, `react-native-wheel-color-picker`  
+- `expo-haptics`, `expo-av`, `expo-image`, `expo-blur`, `expo-font`, `expo-status-bar`, etc.  
+
+### 🧪 Desarrollo y herramientas
+`eslint`, `eslint-config-expo`, `typescript`, `@babel/core`, `@types/react`
+
+---
+## 🛠️ Instrucciones de instalación
+
+### 1. Clonar el repositorio
+bash
+git clone https://github.com/WhiteBryz/to-do-app
+cd to-do-app
+
+###2. Intalar dependencias
+npm install
+
+Requisito: Node.js 18.x y Expo CLI
+npm install -g expo-cli
+
+###3. Ejecutar en modo desarrollo
+npx expo start
+
+## ▶️ Cómo ejecutar la aplicación
+
+Al ejecutar `npm start` **o** `npx expo start` se abrirá en tu navegador el panel **Expo Dev Tools**.  
+Desde ahí puedes lanzar la app de tres maneras:
+
+### 1. Dispositivo físico (Android) — **opción recomendada**
+1. Descarga **Expo Go** desde Google Play → <https://play.google.com/store/apps/details?id=host.exp.exponent&hl=es_MX&pli=1>  
+2. Abre Expo Go y **escanea el código QR** que aparece en Expo Dev Tools.  
+> La forma más rápida de probar en hardware real.
+
+---
+
+### 2. Navegador (Web)
+- En la consola de Metro presiona la tecla **`w`** o haz clic en **_Run in web browser_**.  
+> Ideal para una vista rápida; recuerda que ciertas APIs nativas (notificaciones, sensores, etc.) pueden no estar disponibles.
+
+---
+
+### 3. Emulador Android (Windows)
+1. Instala **Android Studio** → <https://developer.android.com/studio?hl=es-419>  
+2. Abre **Device Manager** y **crea un AVD** con una imagen de Android (API 34 recomendada).  
+3. Asegúrate de que el emulador esté encendido.  
+4. En tu terminal del proyecto ejecuta:  
    ```bash
-   npm install
-   ```
+   npm start
 
-2. Start the app
+**Requisito importante:** Asegúrate de tener configuradas las variables de entorno
+ANDROID_HOME               = Ruta a tu .../Android/Sdk
+PATH += %ANDROID_HOME%\emulator
+PATH += %ANDROID_HOME%\platform-tools
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Guía oficial** Expo + AVD: https://docs.expo.dev/workflow/android-studio-emulator/
