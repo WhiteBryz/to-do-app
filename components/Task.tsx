@@ -4,6 +4,7 @@ import { HStack, VStack } from '@react-native-material/core';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import IconButton from './IconCompleteTask';
+import { useTheme } from '@/context/ThemeContext';
 
 interface TaskComponentProps {
     task: Task;
@@ -11,95 +12,74 @@ interface TaskComponentProps {
 }
 
 export default function TaskComponent(props: TaskComponentProps) {
-    const taskDetails = props.task;
+    const { task } = props;
+    const theme = useTheme();
 
     const PriorityLevel = {
-        'low': {
-            'title': "Bajo",
-            'color': "#66ff66"
-        },
-        'medium': {
-            'title': "Medio",
-            'color': "#ffff00",
-        },
-        'high': {
-            'title': "Alto",
-            'color': "#ff3300"
-        }
-    }
-
-    const borderRadiusNumber = 10;
+        'low': { title: 'Bajo', color: theme.priorityLow },
+        'medium': { title: 'Medio', color: theme.priorityMedium },
+        'high': { title: 'Alto', color: theme.priorityHigh },
+    };
 
     const styles = StyleSheet.create({
         taskContainer: {
             height: 90,
-            width: "100%",
-            display: "flex",
-            flexDirection: "row",
+            width: '100%',
+            flexDirection: 'row',
             paddingVertical: 10,
-            borderTopLeftRadius: borderRadiusNumber,
-            borderTopRightRadius: borderRadiusNumber,
-            borderBottomLeftRadius: borderRadiusNumber,
-            borderBottomRightRadius: borderRadiusNumber,
-            backgroundColor: "#ffe6ff",
-            marginBottom: 10
+            borderRadius: 10,
+            backgroundColor: theme.taskCardBackground,
+            marginBottom: 10,
         },
         taskTextContainer: {
-            width: "68%",
+            width: '68%',
             marginLeft: 5,
-            paddingRight: 10
+            paddingRight: 10,
         },
         taskDateTime: {
-            color: "#ff6600",
-            marginTop: 10
+            color: theme.dateText,
+            marginTop: 10,
         },
         taskPriorityContainer: {
             padding: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         taskPriority: {
             padding: 5,
             borderRadius: 15,
             width: 50,
-            textAlign: "center",
-            fontWeight: 500
+            textAlign: 'center',
+            fontWeight: '500',
+            color: theme.text,
         },
         taskTextConditional: {
-            textDecorationLine: taskDetails.completed ? "line-through" : "none",
-            fontStyle: taskDetails.completed ? "italic" : "normal",
+            textDecorationLine: task.completed ? 'line-through' : 'none',
+            fontStyle: task.completed ? 'italic' : 'normal',
+            color: theme.text,
         },
         taskTitle: {
             fontSize: 17,
-            fontWeight: 600,
+            fontWeight: '600',
         },
         taskDescription: {
             fontSize: 12,
-        }
-    })
+        },
+    });
+
     return (
         <HStack style={styles.taskContainer}>
-            {/* Icono que cambia cuando se toca */}
-            <IconButton onCheck={props.onCheck} isChecked={taskDetails.completed} />
-            {/* Texto con la información de la tarea */}
+            <IconButton onCheck={props.onCheck} isChecked={task.completed} />
             <VStack style={styles.taskTextContainer}>
-                {/* Título */}
-                <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskTitle, styles.taskTextConditional]}>{taskDetails.title}</Text>
-                {/* Descripción */}
-                <Text ellipsizeMode='tail' numberOfLines={1} style={[styles.taskDescription, styles.taskTextConditional]}>{taskDetails.description}</Text>
-                {/* Fecha y Hora */}
-                <Text style={styles.taskDateTime}>{formatCustomDateTime(taskDetails.date, taskDetails.time)}</Text>
+                <Text numberOfLines={1} style={[styles.taskTitle, styles.taskTextConditional]}>{task.title}</Text>
+                <Text numberOfLines={1} style={[styles.taskDescription, styles.taskTextConditional]}>{task.description}</Text>
+                <Text style={styles.taskDateTime}>{formatCustomDateTime(task.date, task.time)}</Text>
             </VStack>
-            {/* Nivel de prioridad */}
             <VStack style={styles.taskPriorityContainer}>
-                <Text style={[
-                    styles.taskPriority,
-                    { backgroundColor: PriorityLevel[taskDetails.priority]?.color || 'gray' }
-                ]}>
-                    {PriorityLevel[taskDetails.priority]?.title || 'Sin prioridad'}
+                <Text style={[styles.taskPriority, { backgroundColor: PriorityLevel[task.priority]?.color || theme.priorityLow }]}>
+                    {PriorityLevel[task.priority]?.title || 'Sin prioridad'}
                 </Text>
             </VStack>
         </HStack>
-    )
+    );
 }

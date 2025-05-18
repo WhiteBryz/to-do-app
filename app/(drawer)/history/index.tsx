@@ -9,12 +9,14 @@ import { Link, useFocusEffect } from "expo-router";
 import { MotiView } from "moti";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext"; // ✅ se agregó
 
 type HistoryFilter = 'pending' | 'completed';
 
 export default function HistoryScreen() {
     const { tasks, reload, setTasks } = useTasks();
     const [filter, setFilter] = useState<HistoryFilter>('pending');
+    const theme = useTheme(); // ✅ tema actual
 
     useFocusEffect(
         useCallback(() => {
@@ -49,8 +51,8 @@ export default function HistoryScreen() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 8 }}>
+        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 8, color: theme.text }}>
                 Historial de tareas
             </Text>
 
@@ -73,7 +75,12 @@ export default function HistoryScreen() {
             {/* Lista de tareas */}
             <ScrollView style={{ flex: 1 }}>
                 {filteredTasks.length === 0 ? (
-                    <Text style={{ textAlign: "center", marginTop: 32, fontStyle: "italic" }}>
+                    <Text style={{
+                        textAlign: "center",
+                        marginTop: 32,
+                        fontStyle: "italic",
+                        color: theme.secondaryText,
+                    }}>
                         No hay tareas {filter === 'pending' ? 'pendientes' : 'completadas'}.
                     </Text>
                 ) : (

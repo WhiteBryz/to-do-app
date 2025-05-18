@@ -14,6 +14,8 @@ import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
 import { addTask } from '@/store/taskStore';
+import { useTheme } from "@/context/ThemeContext";
+
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -23,6 +25,7 @@ export default function HomeScreen() {
         ? tasks.filter(task => getTaskCategories(task).includes(filter))
         : tasks;
 
+    const theme = useTheme();
     const router = useRouter();
     const filteredTasksCompleted = filteredTasks.filter(task => task.completed === true)
     const filteredTasksIncompleted = filteredTasks.filter(task => task.completed === false)
@@ -35,7 +38,6 @@ export default function HomeScreen() {
         }, [])
     );
 
-    // Función para actualizar una tarea en el estado
     const toggleCompleted = async (id: string) => {
         try {
             const updatedTasks = tasks.map(task =>
@@ -49,7 +51,6 @@ export default function HomeScreen() {
             const isNowCompleted = task.completed;
 
             if (isNowCompleted && task.repeat && task.repeatInterval) {
-
                 const newDate = new Date(task.date);
 
                 switch (task.repeatInterval) {
@@ -78,24 +79,20 @@ export default function HomeScreen() {
 
                 await addTask(repeatedTask);
 
-                // Resetear campos de repetición en la original
                 task.repeat = false;
                 task.repeatInterval = '';
             }
 
-            // Guardar tarea actualizada
             await updateTask(task);
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
             await evaluateTrophies();
             await reload();
-              
         } catch (error) {
             console.error("Error al actualizar la tarea", error);
         }
     };
 
-    // Definición de los encabezados personalizados para cada filtro
     const customHeaders: Record<Exclude<FilterOption, null>, string> = {
         today: 'Pendientes de hoy',
         week: 'Para esta semana',
@@ -103,17 +100,14 @@ export default function HomeScreen() {
         later: 'Para después...',
     };
 
-    // console.log(Dimensions.get('window').width * 0.5)
     return (
-        <View style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>
                 {filter ? customHeaders[filter] : ''}
             </Text>
 
-            {/* Barra de progreso */}
             <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
 
-            {/* Filtros con chips */}
             <View style={{ height: "auto", marginBottom: 10 }}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
                     {filters.map(f => (
@@ -127,26 +121,16 @@ export default function HomeScreen() {
                 </ScrollView>
             </View>
 
-            {/* Lista de tareas filtradas y separadas */}
             <ScrollView style={{ flex: 1 }}>
                 {filteredTasks.length === 0 && (
-                    <Text style={{ textAlign: 'center', marginTop: 32, fontStyle: 'italic' }}>
+                    <Text style={{ textAlign: 'center', marginTop: 32, fontStyle: 'italic', color: theme.secondaryText }}>
                         No hay tareas para esta categoría.
                     </Text>
                 )}
                 <TextDivider showComponente={hasTasksIncompleted} text="Pendientes" />
                 {filteredTasksIncompleted.map((task: Task) => (
-                    <MotiView
-                        from={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: 'timing' }}
-                        key={task.id}
-                    >
-                        <Link
-                            key={task.id}
-                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                            asChild
-                        >
+                    <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing' }} key={task.id}>
+                        <Link key={task.id} href={{ pathname: `../home/${task.id}`, params: { id: task.id } }} asChild>
                             <Pressable>
                                 <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
                             </Pressable>
@@ -155,17 +139,8 @@ export default function HomeScreen() {
                 ))}
                 <TextDivider showComponente={hasTasksCompleted} text="Completadas" />
                 {filteredTasksCompleted.map((task: Task) => (
-                    <MotiView
-                        from={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: 'timing' }}
-                        key={task.id}
-                    >
-                        <Link
-                            key={task.id}
-                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                            asChild
-                        >
+                    <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing' }} key={task.id}>
+                        <Link key={task.id} href={{ pathname: `../home/${task.id}`, params: { id: task.id } }} asChild>
                             <Pressable>
                                 <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
                             </Pressable>
@@ -174,21 +149,18 @@ export default function HomeScreen() {
                 ))}
             </ScrollView>
 
-            {/* Botón flotante para nueva tarea */}
-
             <FAB
                 icon={props => <Icon name="plus" {...props} />}
                 color="white"
                 onPress={() => router.push("/modals/newTask")}
                 style={{
                     position: 'absolute',
-                    backgroundColor: "#6200ee",
+                    backgroundColor: theme.primary,
                     borderRadius: 50,
                     bottom: 16,
                     left: Dimensions.get('window').width - 56 - 16,
                 }}
             />
-
         </View>
     );
 }
