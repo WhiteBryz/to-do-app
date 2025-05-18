@@ -3,7 +3,7 @@ import ProgressBarComponent from "@/components/ProgressBar";
 import TaskComponent from "@/components/Task";
 import TextDivider from "@/components/TextDivider";
 import { useTasks } from '@/hooks/UseTasks';
-import { updateTask } from "@/store/taskStore";
+import { addTask, updateTask } from "@/store/taskStore";
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
@@ -13,7 +13,6 @@ import { MotiView } from 'moti';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
-import { addTask } from '@/store/taskStore';
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -80,7 +79,7 @@ export default function HomeScreen() {
 
                 // Resetear campos de repetición en la original
                 task.repeat = false;
-                task.repeatInterval = '';
+                task.repeatInterval = 'none';
             }
 
             // Guardar tarea actualizada
