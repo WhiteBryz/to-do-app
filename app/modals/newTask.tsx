@@ -28,7 +28,11 @@ export default function NewTaskModal() {
   const [repeat, setRepeat] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
+<<<<<<< HEAD
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
+=======
+  const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('');
+>>>>>>> satTestMerge
   const toast = useCustomToast();
 
 
@@ -77,12 +81,18 @@ export default function NewTaskModal() {
     // Validación de fecha y hora de la tarea y recordatorio
     if (!(remiderDateTime > new Date())) {
       // Si la fecha y hora del recordatorio son anteriores a la actual, mostramos un mensaje de error
+      console.log('remiderDateTime entro recordatorio', ()=>{})
       playSound('error')
+<<<<<<< HEAD
       console.log('entro')
       toast.showToast("❌ Error", "No se puede fijar una notificación en el pasado");
+=======
+      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
+>>>>>>> satTestMerge
     } else {
       if (!(taskDate > new Date())) {
         // Si la fecha y hora son anteriores a la actual, mostramos un mensaje de error
+         console.log('remiderDateTime entro tarea', taskDate)
         playSound('error')
         toast.showToast("❌ Error", "La fecha y hora de la tarea ya han pasado");
       } else {
@@ -96,11 +106,19 @@ export default function NewTaskModal() {
 
         // Almacenamos la tarea en el almacenamiento local
         await addTaskStorage(newTask);
+<<<<<<< HEAD
         playSound(click);
+=======
+>>>>>>> satTestMerge
 
         const stats = await getUserStats();
         await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
         await evaluateTrophies();
+<<<<<<< HEAD
+=======
+
+        playSound(click)
+>>>>>>> satTestMerge
         router.back();
       }
     }
