@@ -54,13 +54,16 @@ export default async function scheduleTodoNotification({ task, isReminder = fals
                 title: 'Es hora!',
                 body: task.title,
                 subtitle: task.description,
-                vibrate: [10]
+                data: {
+                    taskId: task.id
+                }
             },
             trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
                 date: trigger
             }
         })
+        console.log('Notificación programada para la tarea:', trigger);
     } catch (e) {
         console.error('Error al crear la notificación: ', e)
         alert('Error al crear el recordatorio. Por favor, intenta nuevamente.')
