@@ -1,7 +1,9 @@
+import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
 import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { PriorityLevel, ReminderOption, Task } from '@/types/task';
+import scheduleTodoNotification from '@/utils/scheduleToDoNotification';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
@@ -20,7 +22,7 @@ export default function NewTaskModal() {
   const [time, setTime] = useState(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);;
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [reminder, setReminder] = useState<ReminderOption>('10min');
+  const [reminder, setReminder] = useState<ReminderOption>('none');
   const [repeat, setRepeat] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
@@ -47,7 +49,14 @@ export default function NewTaskModal() {
       updatedAt: new Date().toISOString(),
     };
 
+    // Almacenamos la tarea en el almacenamiento local
     await addTaskStorage(newTask);
+    playSound(click)
+
+    if(newTask.reminder !== 'none') {
+      await scheduleTodoNotification({ task: newTask, isReminder: true });
+    }
+    await scheduleTodoNotification({task:newTask})
     router.back();
   };
 
@@ -103,6 +112,7 @@ export default function NewTaskModal() {
 
           <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
           <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
+            <RadioButton.Item label="Ninguno" value="none" />
             <RadioButton.Item label="5 min antes" value="5min" />
             <RadioButton.Item label="10 min antes" value="10min" />
             <RadioButton.Item label="30 min antes" value="30min" />
