@@ -28,8 +28,8 @@ export default function DrawerLayout() {
         }
         }} />
         <Drawer.Screen name="history/index" options={{
-          title: 'Historial', drawerIcon: ({ color, size }) => {
-            return <Ionicons name="time" color={color} size={size} />;
+          title: 'Historial', drawerIcon: ({ color, size, focused }) => {
+            return <Ionicons name="time-outline" color={focused ? theme.primary : theme.text} size={size} />;
           }
         }} />
         <Drawer.Screen name="settings/index" options={{ title: 'Configuración', drawerIcon: ({color, size, focused}) =>{
