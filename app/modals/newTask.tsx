@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, RadioButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { RepeatInterval } from '@/types/task';
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function NewTaskModal() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function NewTaskModal() {
   const [repeat, setRepeat] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
+  const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('');
 
 
   const handleSave = async () => {
@@ -40,14 +43,19 @@ export default function NewTaskModal() {
       priority,
       date: date.toISOString(),
       time: time.toTimeString().slice(0, 5), // HH:mm
-      reminder,
+      reminder, 
       repeat,
+      repeatInterval,
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     await addTaskStorage(newTask);
+
+    const stats = await getUserStats();
+    await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
+    await evaluateTrophies();
     router.back();
   };
 
@@ -109,12 +117,44 @@ export default function NewTaskModal() {
             <RadioButton.Item label="1 día antes" value="1day" />
           </RadioButton.Group>
 
-          <View style={styles.repeat}>
-            <Checkbox
-              status={repeat ? 'checked' : 'unchecked'}
-              onPress={() => setRepeat(!repeat)}
-            />
-            <Text>Repetir tarea</Text>
+          <View style={styles.repeatSection}>
+            <Pressable
+              style={styles.repeatToggle}
+              onPress={() => {
+                const newValue = !repeat;
+                setRepeat(newValue);
+                if (newValue && repeatInterval === '') {
+                  setRepeatInterval('daily');
+                }
+              }}
+            >
+              <Checkbox
+                status={repeat ? 'checked' : 'unchecked'}
+                onPress={() => {
+                  const newValue = !repeat;
+                  setRepeat(newValue);
+                  if (newValue && repeatInterval === '') {
+                    setRepeatInterval('daily');
+                  }
+                }}
+              />
+              <Text style={styles.repeatLabel}>Repetir tarea</Text>
+            </Pressable>
+
+            {repeat && (
+              <View style={styles.repeatOptions}>
+                <Text style={styles.repeatTitle}>Frecuencia de repetición</Text>
+                <RadioButton.Group
+                  onValueChange={(value) => setRepeatInterval(value as RepeatInterval)}
+                  value={repeatInterval}
+                >
+                  <RadioButton.Item label="Diario" value="daily" />
+                  <RadioButton.Item label="Semanal" value="weekly" />
+                  <RadioButton.Item label="Mensual" value="monthly" />
+                  <RadioButton.Item label="Anual" value="yearly" />
+                </RadioButton.Group>
+              </View>
+            )}
           </View>
 
           <Text variant="labelLarge" style={{ marginTop: 16 }}>Prioridad</Text>
@@ -178,5 +218,31 @@ const styles = StyleSheet.create({
     flex: 0.5,
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  repeatSection: {
+    marginTop: 20,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: '#f1f1f1',
+  },
+  repeatToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  repeatLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  repeatOptions: {
+    marginTop: 12,
+    paddingLeft: 4,
+  },
+  repeatTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#555',
+  },
+  
 });

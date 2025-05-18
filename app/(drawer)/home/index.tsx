@@ -13,6 +13,7 @@ import { MotiView } from 'moti';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
+import { addTask } from '@/store/taskStore';
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -42,13 +43,53 @@ export default function HomeScreen() {
             );
             setTasks(updatedTasks);
 
-            const task = updatedTasks.find(task => task.id === id)
-            if (task) {
-                await updateTask(task)
+            const task = updatedTasks.find(task => task.id === id);
+            if (!task) return;
+
+            const isNowCompleted = task.completed;
+
+            if (isNowCompleted && task.repeat && task.repeatInterval) {
+
+                const newDate = new Date(task.date);
+
+                switch (task.repeatInterval) {
+                    case 'daily':
+                        newDate.setDate(newDate.getDate() + 1);
+                        break;
+                    case 'weekly':
+                        newDate.setDate(newDate.getDate() + 7);
+                        break;
+                    case 'monthly':
+                        newDate.setMonth(newDate.getMonth() + 1);
+                        break;
+                    case 'yearly':
+                        newDate.setFullYear(newDate.getFullYear() + 1);
+                        break;
+                }
+
+                const repeatedTask: Task = {
+                    ...task,
+                    id: Date.now().toString(),
+                    date: newDate.toISOString(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    completed: false,
+                };
+
+                await addTask(repeatedTask);
+
+                // Resetear campos de repetición en la original
+                task.repeat = false;
+                task.repeatInterval = '';
             }
+
+            // Guardar tarea actualizada
+            await updateTask(task);
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
             await evaluateTrophies();
+            await reload();
+              
         } catch (error) {
             console.error("Error al actualizar la tarea", error);
         }
