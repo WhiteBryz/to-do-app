@@ -5,12 +5,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { TextInput, Text, Button, Switch } from 'react-native-paper';
+import { RepeatInterval } from '@/types/task'; // asegúrate de importar el tipo
+
 
 export default function TaskDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
   const [task, setTask] = useState<Task | null>(null);
+  const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>(''); // 👈 nuevo estado
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
@@ -34,6 +37,7 @@ export default function TaskDetail() {
     const loadTask = async () => {
       const found = await findTaskById(id);
       if (found) {
+        setRepeatInterval(found.repeatInterval || '');
         setTask(found);
         setTitle(found.title);
         setDescription(found.description);
@@ -61,6 +65,7 @@ export default function TaskDetail() {
       priority,
       reminder,
       repeat,
+      repeatInterval, // 👈 aquí lo agregas
       updatedAt: new Date().toISOString(),
     };
 
@@ -145,9 +150,37 @@ export default function TaskDetail() {
         ))}
       </View>
 
-      <View style={styles.switchRow}>
-        <Text variant="titleMedium">Repetir</Text>
-        <Switch value={repeat} onValueChange={setRepeat} />
+      <View style={styles.repeatSection}>
+        <View style={styles.repeatHeader}>
+          <Text style={styles.repeatLabel}>Repetir tarea</Text>
+          <Switch
+            value={repeat}
+            onValueChange={(value) => {
+              setRepeat(value);
+              if (value && repeatInterval === '') {
+                setRepeatInterval('daily');
+              }
+            }}
+          />
+        </View>
+
+        {repeat && (
+          <View style={styles.repeatOptions}>
+            <Text style={styles.repeatTitle}>Frecuencia de repetición</Text>
+            <View style={styles.intervalButtons}>
+              {(['daily', 'weekly', 'monthly', 'yearly'] as RepeatInterval[]).map(interval => (
+                <Button
+                  key={interval}
+                  mode={repeatInterval === interval ? 'contained' : 'outlined'}
+                  onPress={() => setRepeatInterval(interval)}
+                  style={styles.intervalButton}
+                >
+                  {interval.charAt(0).toUpperCase() + interval.slice(1)}
+                </Button>
+              ))}
+            </View>
+          </View>
+        )}
       </View>
 
       <Text variant="titleMedium" style={styles.label}>Notas</Text>
@@ -211,4 +244,38 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 8,
   },
+  repeatSection: {
+    backgroundColor: '#f4f4f4',
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 16,
+  },
+  repeatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  repeatLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  repeatTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  repeatOptions: {
+    marginTop: 8,
+  },
+  intervalButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  intervalButton: {
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  
 });
