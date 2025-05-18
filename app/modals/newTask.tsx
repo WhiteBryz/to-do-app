@@ -5,7 +5,7 @@ import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
-import scheduleTodoNotification from '@/utils/scheduleToDoNotification';
+import { buildTaskDate, getReminderDate } from '@/utils/handleNotifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
@@ -31,6 +31,23 @@ export default function NewTaskModal() {
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
   const toast = useCustomToast();
 
+  async function validateDatesOrAlert(taskDate: Date, reminderDate: Date): Promise<boolean> {
+    const now = new Date();
+
+    if (reminderDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
+      return false;
+    }
+
+    if (taskDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "La fecha y hora de la tarea ya han pasado");
+      return false;
+    }
+
+    return true;
+  }
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -54,11 +71,6 @@ export default function NewTaskModal() {
       updatedAt: new Date().toISOString(),
     };
 
-    const [hours, minutes] = newTask.time.split(':').map(Number);
-
-    const taskDate = new Date(newTask.date);
-    taskDate.setHours(hours);
-    taskDate.setMinutes(minutes);
     const reminderOptions = {
       'none': 0,
       '5min': 5,
@@ -67,46 +79,23 @@ export default function NewTaskModal() {
       '1day': 1440, // 24 horas * 60 minutos
     }
 
-    const reminderTime = reminderOptions[newTask.reminder as keyof typeof reminderOptions];
-    const remiderDateTime = new Date(taskDate)
-    remiderDateTime.setMinutes(remiderDateTime.getMinutes() - reminderTime);
-    //console.log('remiderDateTime', remiderDateTime)
-    //console.log('taskDate', taskDate)
-    //console.log('newDate', new Date())
+    const taskDate = buildTaskDate(newTask.date, newTask.time);
+    const reminderDate = getReminderDate(taskDate, newTask.reminder as keyof typeof reminderOptions);
 
-    // Validación de fecha y hora de la tarea y recordatorio
-    if (!(remiderDateTime > new Date())) {
-      // Si la fecha y hora del recordatorio son anteriores a la actual, mostramos un mensaje de error
-      console.log('remiderDateTime entro recordatorio', ()=>{})
-      playSound('error')
-      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
-    } else {
-      if (!(taskDate > new Date())) {
-        // Si la fecha y hora son anteriores a la actual, mostramos un mensaje de error
-         console.log('remiderDateTime entro tarea', taskDate)
-        playSound('error')
-        toast.showToast("❌ Error", "La fecha y hora de la tarea ya han pasado");
-      } else {
-        // Programar la notificación para recordatorio
-        if (newTask.reminder !== 'none') {
-          await scheduleTodoNotification({ task: newTask, isReminder: true });
-        }
+    // Validar fechas y horas de tarea y recordatorio/s
+    const isValid = await validateDatesOrAlert(taskDate, reminderDate);
+    if (!isValid) return;
 
-        // Programar la notificación para fecha específica de la tarea
-        await scheduleTodoNotification({ task: newTask })
+    // Guardar en almacenamiento
+    await addTaskStorage(newTask);
+    const stats = await getUserStats();
+    await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
+    await evaluateTrophies();
 
-        // Almacenamos la tarea en el almacenamiento local
-        await addTaskStorage(newTask);
+    playSound(click)
+    router.back();
+  }
 
-        const stats = await getUserStats();
-        await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
-        await evaluateTrophies();
-
-        playSound(click)
-        router.back();
-      }
-    }
-  };
 
   const canSaveNewTask = title.length > 3 ? true : false;
   //console.log('canSaveNewTask', canSaveNewTask);

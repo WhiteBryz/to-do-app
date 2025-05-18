@@ -44,7 +44,7 @@ export default function HomeScreen() {
 
             const task = updatedTasks.find(task => task.id === id);
             if (!task) return;
-
+            
             const isNowCompleted = task.completed;
 
             if (isNowCompleted && task.repeat && task.repeatInterval) {
