@@ -1,5 +1,6 @@
 import { Task } from "@/types/task";
 import * as Notifications from "expo-notifications";
+import { Alert } from "react-native";
 
 
 interface ScheduleTodoNotification {
@@ -32,6 +33,8 @@ export default async function scheduleTodoNotification({ task, isReminder = fals
     date.setHours(hours);
     date.setMinutes(minutes);
 
+    //const formatDateTime = formatToObjectDateTime(task.date, task.time)
+
     // Calcular el tiempo de recordatorio
     const reminder = reminderOptions[task.reminder as keyof typeof reminderOptions];
 
@@ -45,11 +48,11 @@ export default async function scheduleTodoNotification({ task, isReminder = fals
         alert("La fecha y hora de la tarea ya han pasado");
         return;
     }
-
+    console.log('trigger', trigger.getDate(), trigger.getMonth()+1, trigger.getFullYear(), trigger.getHours(), trigger.getMinutes())
     try {
         // Programar la notificación
         await Notifications.scheduleNotificationAsync({
-            identifier: `Noty: ${task.id}`,
+            identifier: task.id,
             content: {
                 title: 'Es hora!',
                 body: task.title,
@@ -60,12 +63,17 @@ export default async function scheduleTodoNotification({ task, isReminder = fals
             },
             trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: trigger
+                date: trigger,
             }
         })
-        console.log('Notificación programada para la tarea:', trigger);
+        console.log('Notificación programada para la tarea:', task.title);
     } catch (e) {
         console.error('Error al crear la notificación: ', e)
-        alert('Error al crear el recordatorio. Por favor, intenta nuevamente.')
+        Alert.alert("Error","No se pudo programar la notificación",[
+            { text: "Ok", style: "cancel" },
+            { text: "Reintentar", onPress: ()  =>  scheduleTodoNotification({ task, isReminder }) }
+        ],{
+            cancelable: true
+        },)
     }
 }
