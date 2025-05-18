@@ -109,6 +109,16 @@ export default function TaskDetail() {
       router.back();
     }
   };
+  const handleMarkComplete =async ()=>{
+    if (!task) return;
+          const updatedTask: Task = {
+            ...task,
+            completed: !task.completed,
+            updatedAt: new Date().toISOString(),
+          };
+          await updateTask(updatedTask);
+          router.back();
+  }
 
   if (!task) {
     return <Text style={styles.loading}>Cargando...</Text>;
@@ -353,19 +363,10 @@ export default function TaskDetail() {
 
       {/* Barra de navegación inferior */}
       <View style={styles.bottomBar}>
-        <Pressable style={styles.navItem} onPress={() => {
-          if (!task) return;
-          const updatedTask: Task = {
-            ...task,
-            completed: !task.completed,
-            updatedAt: new Date().toISOString(),
-          };
-          updateTask(updatedTask);
-          router.back();
-        }}>
+        <Pressable style={styles.navItem} onPress={handleMarkComplete}>
           
           <MaterialCommunityIcons name={(task.completed)?'checkbox-marked-circle':'check-circle-outline'} size={24} color="#fff" />
-          <Text style={styles.navText}>{(task.completed)?'Marcar como pendiente':'Marcar como completada'}</Text>
+          <Text style={styles.navText}>{(task.completed)?'Marcar pendiente':'Completada'}</Text>
         </Pressable>
 
         <Pressable style={styles.navItem} onPress={handleDelete}>
