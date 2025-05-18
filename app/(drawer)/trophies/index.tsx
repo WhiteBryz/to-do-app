@@ -3,12 +3,30 @@ import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useTrophies } from '@/hooks/useTrophies';
 import { resetUserStats } from '@/store/trophiesStore';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function TrophyScreen() {
   const { trophies } = useTrophies();
 
   const unlocked = trophies.filter(t => t.unlocked);
   const locked = trophies.filter(t => !t.unlocked);
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkFirstVisit = async () => {
+        const stats = await getUserStats();
+
+        if (!stats.firstTrophy) {
+          await updateUserStats({ firstTrophy: true });
+          await evaluateTrophies();
+        }
+      };
+
+      checkFirstVisit();
+    }, [])
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -75,12 +93,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
-  },
+  }, 
   trophyText: {
     marginLeft: 16,
     fontSize: 16,
     fontWeight: '500',
     color: '#333',
+    flexShrink: 1,         
+    flexWrap: 'wrap',       
+    maxWidth: '80%',       
   },
   lockedCard: {
     backgroundColor: '#e0e0e0',

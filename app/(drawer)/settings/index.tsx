@@ -8,6 +8,9 @@ import { useSound } from '@/hooks/useSound';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 
 export default function Settings() {
@@ -23,6 +26,21 @@ export default function Settings() {
   const theme = useTheme();
   const toast = useCustomToast();
   const { username, profileColor } = useSettings();
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkFirstVisit = async () => {
+        const stats = await getUserStats();
+
+        if (!stats.firstSettings) {
+          await updateUserStats({ firstSettings: true });
+          await evaluateTrophies();
+        }
+      };
+
+      checkFirstVisit();
+    }, [])
+  );
 
   return (
     <ScrollView

@@ -31,9 +31,20 @@ export default function HomeScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            reload();
+            const checkFirstTime = async () => {
+                const stats = await getUserStats();
+
+                if (!stats.firstHome) {
+                    await updateUserStats({ firstHome: true });
+                    await evaluateTrophies(); // Revisa si se desbloqueó el trofeo
+                }
+
+                await reload(); // Carga las tareas
+            };
+
+            checkFirstTime();
         }, [])
-    );
+      );
 
     // Función para actualizar una tarea en el estado
     const toggleCompleted = async (id: string) => {

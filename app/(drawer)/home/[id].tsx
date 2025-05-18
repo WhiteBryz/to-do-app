@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { TextInput, Text, Button, Switch } from 'react-native-paper';
 import { RepeatInterval } from '@/types/task'; // asegúrate de importar el tipo
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 
 export default function TaskDetail() {
@@ -34,7 +35,15 @@ export default function TaskDetail() {
   };
 
   useEffect(() => {
-    const loadTask = async () => {
+    const init = async () => {
+      // 1. Verifica si es la primera vez en pantalla de tarea
+      const stats = await getUserStats();
+      if (!stats.firstTask) {
+        await updateUserStats({ firstTask: true });
+        await evaluateTrophies();
+      }
+
+      // 2. Carga la tarea
       const found = await findTaskById(id);
       if (found) {
         setRepeatInterval(found.repeatInterval || '');
@@ -49,7 +58,7 @@ export default function TaskDetail() {
         setRepeat(found.repeat);
       }
     };
-    loadTask();
+    init();
   }, [id]);
 
   const handleSave = async () => {

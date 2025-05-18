@@ -9,4 +9,8 @@ export type Trophy = {
 export type UserStats = {
     tasksCompleted: number;
     tasksCreated: number;
+    firstHome: boolean;
+    firstSettings: boolean;
+    firstTrophy: boolean;
+    firstTask: boolean;
   };
