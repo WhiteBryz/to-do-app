@@ -1,7 +1,11 @@
+import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
+import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
-import { PriorityLevel, ReminderOption, Task } from '@/types/task';
+import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
+import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
+import scheduleTodoNotification from '@/utils/scheduleToDoNotification';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
@@ -9,8 +13,6 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, RadioButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { RepeatInterval } from '@/types/task';
-import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 export default function NewTaskModal() {
   const router = useRouter();
@@ -22,11 +24,12 @@ export default function NewTaskModal() {
   const [time, setTime] = useState(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);;
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [reminder, setReminder] = useState<ReminderOption>('10min');
+  const [reminder, setReminder] = useState<ReminderOption>('none');
   const [repeat, setRepeat] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('');
+  const toast = useCustomToast();
 
 
   const handleSave = async () => {
@@ -38,12 +41,12 @@ export default function NewTaskModal() {
     const newTask: Task = {
       id: Date.now().toString(),
       title,
-      description,
-      note,
+      description: description.trim(),
+      note: description.trim() ? note : '',
       priority,
       date: date.toISOString(),
       time: time.toTimeString().slice(0, 5), // HH:mm
-      reminder, 
+      reminder,
       repeat,
       repeatInterval,
       completed: false,
@@ -51,15 +54,60 @@ export default function NewTaskModal() {
       updatedAt: new Date().toISOString(),
     };
 
-    await addTaskStorage(newTask);
+    const [hours, minutes] = newTask.time.split(':').map(Number);
 
-    const stats = await getUserStats();
-    await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
-    await evaluateTrophies();
-    router.back();
+    const taskDate = new Date(newTask.date);
+    taskDate.setHours(hours);
+    taskDate.setMinutes(minutes);
+    const reminderOptions = {
+      'none': 0,
+      '5min': 5,
+      '10min': 10,
+      '30min': 30,
+      '1day': 1440, // 24 horas * 60 minutos
+    }
+
+    const reminderTime = reminderOptions[newTask.reminder as keyof typeof reminderOptions];
+    const remiderDateTime = new Date(taskDate)
+    remiderDateTime.setMinutes(remiderDateTime.getMinutes() - reminderTime);
+    //console.log('remiderDateTime', remiderDateTime)
+    //console.log('taskDate', taskDate)
+    //console.log('newDate', new Date())
+
+    // Validación de fecha y hora de la tarea y recordatorio
+    if (!(remiderDateTime > new Date())) {
+      // Si la fecha y hora del recordatorio son anteriores a la actual, mostramos un mensaje de error
+      playSound('error')
+      toast.showToast("❌ Error", "No se puede fijar una notificación en el pasado");
+    } else {
+      if (!(taskDate > new Date())) {
+        // Si la fecha y hora son anteriores a la actual, mostramos un mensaje de error
+        playSound('error')
+        toast.showToast("❌ Error", "La fecha y hora de la tarea ya han pasado");
+      } else {
+        // Programar la notificación para recordatorio
+        if (newTask.reminder !== 'none') {
+          await scheduleTodoNotification({ task: newTask, isReminder: true });
+        }
+
+        // Programar la notificación para fecha específica de la tarea
+        await scheduleTodoNotification({ task: newTask })
+
+        // Almacenamos la tarea en el almacenamiento local
+        await addTaskStorage(newTask);
+
+        const stats = await getUserStats();
+        await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
+        await evaluateTrophies();
+
+        playSound(click)
+        router.back();
+      }
+    }
   };
 
   const canSaveNewTask = title.length > 3 ? true : false;
+  //console.log('canSaveNewTask', canSaveNewTask);
 
   return (
     <SafeAreaView>
@@ -111,6 +159,7 @@ export default function NewTaskModal() {
 
           <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
           <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
+            <RadioButton.Item label="Ninguno" value="none" />
             <RadioButton.Item label="5 min antes" value="5min" />
             <RadioButton.Item label="10 min antes" value="10min" />
             <RadioButton.Item label="30 min antes" value="30min" />
@@ -177,7 +226,7 @@ export default function NewTaskModal() {
               <Text style={[styles.textButton, { color: theme.text }]}>Cancelar</Text>
             </Pressable>
 
-            <Pressable disabled={canSaveNewTask} style={[styles.pressableButton, {}]} onPress={handleSave}>
+            <Pressable disabled={!canSaveNewTask} style={[styles.pressableButton, {}]} onPress={handleSave}>
               <Text style={[styles.textButton, { color: theme.text, opacity: canSaveNewTask ? 1 : 0.5 }]}>Guardar Tarea</Text>
             </Pressable>
           </HStack>
@@ -244,5 +293,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#555',
   },
-  
+
 });

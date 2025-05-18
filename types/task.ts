@@ -1,4 +1,4 @@
-export type ReminderOption = '5min' | '10min' | '30min' | '1day';
+export type ReminderOption = 'none' |'5min' | '10min' | '30min' | '1day';
 export type PriorityLevel = 'low' | 'medium' | 'high';
 export type FilterOption = 'today' | 'week' | 'month' | 'later' | null;
 export type RepeatInterval = 'daily' | 'weekly' | 'monthly' | 'yearly' | '';
