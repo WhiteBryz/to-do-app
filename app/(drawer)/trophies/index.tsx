@@ -1,13 +1,14 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useTrophies } from '@/hooks/useTrophies';
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
 import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function TrophyScreen() {
   const { trophies } = useTrophies();
+  const theme = useTheme();
 
   const unlocked = trophies.filter(t => t.unlocked);
   const locked = trophies.filter(t => !t.unlocked);
@@ -16,38 +17,40 @@ export default function TrophyScreen() {
     useCallback(() => {
       const checkFirstVisit = async () => {
         const stats = await getUserStats();
-
         if (!stats.firstTrophy) {
           await updateUserStats({ firstTrophy: true });
           await evaluateTrophies();
         }
       };
-
       checkFirstVisit();
     }, [])
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.header, { color: theme.text }]}>
         Trofeos desbloqueados: {unlocked.length} / {trophies.length}
       </Text>
 
-      {/* Sección desbloqueados */}
-      <Text style={styles.sectionTitle}>🏆 Desbloqueados</Text>
-      {unlocked.length > 0 ? unlocked.map(t => (
-        <View style={styles.trophyCard} key={t.id}>
-          <AntDesign name={t.icon as any} size={36} color="#4caf50" />
-          <Text style={styles.trophyText}>{t.title}</Text>
-        </View>
-      )) : <Text style={styles.empty}>Aún no has desbloqueado trofeos</Text>}
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>🏆 Desbloqueados</Text>
+      {unlocked.length > 0 ? (
+        unlocked.map(t => (
+          <View style={[styles.trophyCard, { backgroundColor: theme.card }]} key={t.id}>
+            <AntDesign name={t.icon as any} size={36} color={theme.trophyGold} />
+            <Text style={[styles.trophyText, { color: theme.text }]}>{t.title}</Text>
+          </View>
+        ))
+      ) : (
+        <Text style={[styles.empty, { color: theme.secondaryText }]}>
+          Aún no has desbloqueado trofeos
+        </Text>
+      )}
 
-      {/* Sección bloqueados */}
-      <Text style={styles.sectionTitle}>🔒 Bloqueados</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>🔒 Bloqueados</Text>
       {locked.map(t => (
-        <View style={[styles.trophyCard, styles.lockedCard]} key={t.id}>
-          <AntDesign name={t.icon as any} size={36} color="#aaa" />
-          <Text style={[styles.trophyText, styles.lockedText]}>{t.title}</Text>
+        <View style={[styles.trophyCard, { backgroundColor: theme.surface }]} key={t.id}>
+          <AntDesign name={t.icon as any} size={36} color={theme.secondaryText} />
+          <Text style={[styles.trophyText, { color: theme.secondaryText }]}>{t.title}</Text>
         </View>
       ))}
     </ScrollView>
@@ -57,7 +60,6 @@ export default function TrophyScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#f4f4f4',
   },
   header: {
     fontSize: 18,
@@ -70,10 +72,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 20,
     marginBottom: 8,
-    color: '#333',
   },
   trophyCard: {
-    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -84,25 +84,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
-  }, 
+  },
   trophyText: {
     marginLeft: 16,
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
-    flexShrink: 1,         
-    flexWrap: 'wrap',       
-    maxWidth: '80%',       
-  },
-  lockedCard: {
-    backgroundColor: '#e0e0e0',
-  },
-  lockedText: {
-    color: '#777',
+    flexShrink: 1,
+    flexWrap: 'wrap',
+    maxWidth: '80%',
   },
   empty: {
     fontSize: 14,
-    color: '#888',
     fontStyle: 'italic',
     marginLeft: 8,
   },
