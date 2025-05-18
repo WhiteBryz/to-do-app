@@ -88,6 +88,7 @@ export default function HomeScreen() {
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
             await evaluateTrophies();
+            await reload();
               
         } catch (error) {
             console.error("Error al actualizar la tarea", error);
