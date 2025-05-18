@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Chip, useTheme } from 'react-native-paper';
+import { Chip } from 'react-native-paper';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ChipFilterProps {
   label: string;
@@ -11,15 +12,30 @@ interface ChipFilterProps {
 export default function ChipFilter({ label, selected, onSelect }: ChipFilterProps) {
   const theme = useTheme();
 
+  const chipBackgroundColor = selected
+    ? theme.chipSelected
+    : theme.chipUnselectedBackground;
+
+  const chipTextColor = selected
+    ? theme.chipText
+    : theme.chipUnselectedText;
+
+  const chipBorderColor = selected
+    ? theme.chipSelected
+    : theme.primary;
+
   return (
     <Chip
       mode="outlined"
       onPress={onSelect}
       style={[
         styles.chip,
-        selected && { backgroundColor: theme.colors.primary }
+        {
+          backgroundColor: chipBackgroundColor,
+          borderColor: chipBorderColor,
+        },
       ]}
-      textStyle={selected ? { color: 'white' } : {}}
+      textStyle={{ color: chipTextColor }}
     >
       {label}
     </Chip>

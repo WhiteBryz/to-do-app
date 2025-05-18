@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ProgressBar, useTheme } from 'react-native-paper';
+import { ProgressBar } from 'react-native-paper';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ProgressBarProps {
     completed: number;
@@ -13,21 +14,13 @@ export default function ProgressBarComponent({ completed, total }: ProgressBarPr
 
     return (
         <View style={styles.container}>
-            
-            {
-                total > 0 ?
-                    <Text style={styles.text}>
-                        {completed} de {total} tareas completadas
-                    </Text> :
-                    <Text style={styles.text}>
-                        No hay tareas agregadas
-                    </Text>
-            }
-
+            <Text style={[styles.text, { color: theme.progressText }]}>
+                {total > 0 ? `${completed} de ${total} tareas completadas` : 'No hay tareas agregadas'}
+            </Text>
             <ProgressBar
                 progress={progress}
-                color={theme.colors.primary}
-                style={styles.progressBar}
+                color={theme.primary}
+                style={[styles.progressBar, { backgroundColor: theme.progressBackground }]}
             />
         </View>
     );
@@ -38,7 +31,6 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     text: {
-        color: 'black',
         marginBottom: 8,
     },
     progressBar: {
