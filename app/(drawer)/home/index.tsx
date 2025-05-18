@@ -56,17 +56,17 @@ export default function HomeScreen() {
 
     // Definición de los encabezados personalizados para cada filtro
     const customHeaders: Record<Exclude<FilterOption, null>, string> = {
-        today: 'Tareas para hoy',
-        week: 'Tareas para esta semana',
-        month: 'Tareas para este mes',
-        later: 'Tareas para después',
+        today: 'Pendientes de hoy',
+        week: 'Para esta semana',
+        month: 'Este mes',
+        later: 'Para después...',
     };
-    
+
     // console.log(Dimensions.get('window').width * 0.5)
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
-                {filter ? customHeaders[filter] : 'Todas las tareas'}
+                {filter ? customHeaders[filter] : ''}
             </Text>
 
             {/* Barra de progreso */}
@@ -80,7 +80,7 @@ export default function HomeScreen() {
                             key={f.value}
                             label={f.label}
                             selected={filter === f.value}
-                            onSelect={() => setFilter(filter === f.value ? null : f.value)} // toggle
+                            onSelect={() => setFilter(f.value)}
                         />
                     ))}
                 </ScrollView>
@@ -134,20 +134,20 @@ export default function HomeScreen() {
             </ScrollView>
 
             {/* Botón flotante para nueva tarea */}
-            
-                <FAB
-                    icon={props => <Icon name="plus" {...props} />}
-                    color="white"
-                    onPress={()=>router.push("/modals/newTask")}
-                    style={{
-                        position: 'absolute',
-                        backgroundColor: "#6200ee",
-                        borderRadius: 50,
-                        bottom: 16,
-                        left: Dimensions.get('window').width - 56 - 16,
-                    }}
-                /> 
-           
+
+            <FAB
+                icon={props => <Icon name="plus" {...props} />}
+                color="white"
+                onPress={() => router.push("/modals/newTask")}
+                style={{
+                    position: 'absolute',
+                    backgroundColor: "#6200ee",
+                    borderRadius: 50,
+                    bottom: 16,
+                    left: Dimensions.get('window').width - 56 - 16,
+                }}
+            />
+
         </View>
     );
 }
