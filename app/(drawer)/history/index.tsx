@@ -1,4 +1,4 @@
-import TextDivider from "@/components/TextDivider";
+import ChipFilter from "@/components/ChipFilter";
 import TaskComponent from "@/components/Task";
 import { useTasks } from "@/hooks/UseTasks";
 import { updateTask } from "@/store/taskStore";
@@ -7,11 +7,14 @@ import { Task } from "@/types/task";
 import { isBefore, startOfToday, parseISO } from "date-fns";
 import { Link, useFocusEffect } from "expo-router";
 import { MotiView } from "moti";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+
+type HistoryFilter = 'pending' | 'completed';
 
 export default function HistoryScreen() {
     const { tasks, reload, setTasks } = useTasks();
+    const [filter, setFilter] = useState<HistoryFilter>('pending');
 
     useFocusEffect(
         useCallback(() => {
@@ -19,13 +22,13 @@ export default function HistoryScreen() {
         }, [])
     );
 
-    // Filtrar tareas cuya fecha sea antes de hoy
     const pastTasks = tasks.filter(task =>
         isBefore(parseISO(task.date), startOfToday())
     );
 
-    const pastTasksCompleted = pastTasks.filter(t => t.completed);
-    const pastTasksIncompleted = pastTasks.filter(t => !t.completed);
+    const filteredTasks = pastTasks.filter(task =>
+        filter === 'pending' ? !task.completed : task.completed
+    );
 
     const toggleCompleted = async (id: string) => {
         try {
@@ -35,9 +38,7 @@ export default function HistoryScreen() {
             setTasks(updatedTasks);
 
             const task = updatedTasks.find(task => task.id === id);
-            if (task) {
-                await updateTask(task);
-            }
+            if (task) await updateTask(task);
 
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });
@@ -49,56 +50,52 @@ export default function HistoryScreen() {
 
     return (
         <View style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 8 }}>
                 Historial de tareas
             </Text>
 
+            {/* Chips */}
+            <View style={{ height: "auto", marginBottom: 10 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
+                    <ChipFilter
+                        label="Pendientes"
+                        selected={filter === 'pending'}
+                        onSelect={() => setFilter('pending')}
+                    />
+                    <ChipFilter
+                        label="Completadas"
+                        selected={filter === 'completed'}
+                        onSelect={() => setFilter('completed')}
+                    />
+                </ScrollView>
+            </View>
+
+            {/* Lista de tareas */}
             <ScrollView style={{ flex: 1 }}>
-                {pastTasks.length === 0 && (
+                {filteredTasks.length === 0 ? (
                     <Text style={{ textAlign: "center", marginTop: 32, fontStyle: "italic" }}>
-                        No hay tareas pasadas registradas.
+                        No hay tareas {filter === 'pending' ? 'pendientes' : 'completadas'}.
                     </Text>
+                ) : (
+                    filteredTasks.map((task: Task) => (
+                        <MotiView
+                            from={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ type: "timing" }}
+                            key={task.id}
+                        >
+                            <Link
+                                key={task.id}
+                                href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
+                                asChild
+                            >
+                                <Pressable>
+                                    <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
+                                </Pressable>
+                            </Link>
+                        </MotiView>
+                    ))
                 )}
-
-                <TextDivider showComponente={pastTasksIncompleted.length > 0} text="Pendientes" />
-                {pastTasksIncompleted.map((task: Task) => (
-                    <MotiView
-                        from={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: "timing" }}
-                        key={task.id}
-                    >
-                        <Link
-                            key={task.id}
-                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                            asChild
-                        >
-                            <Pressable>
-                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
-                            </Pressable>
-                        </Link>
-                    </MotiView>
-                ))}
-
-                <TextDivider showComponente={pastTasksCompleted.length > 0} text="Completadas" />
-                {pastTasksCompleted.map((task: Task) => (
-                    <MotiView
-                        from={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: "timing" }}
-                        key={task.id}
-                    >
-                        <Link
-                            key={task.id}
-                            href={{ pathname: `../home/${task.id}`, params: { id: task.id } }}
-                            asChild
-                        >
-                            <Pressable>
-                                <TaskComponent task={task} onCheck={() => toggleCompleted(task.id)} />
-                            </Pressable>
-                        </Link>
-                    </MotiView>
-                ))}
             </ScrollView>
         </View>
     );
