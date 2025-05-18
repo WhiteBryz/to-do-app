@@ -16,6 +16,11 @@ export const lightTheme = {
   priorityLow: '#81C784',
   priorityMedium: '#FFD54F',
   priorityHigh: '#E57373',
+  card: '#f1f1f1',
+  inputBackground: '#FFFFFF',
+  labelColor: '#444',
+  buttonText: '#FFFFFF', // blanco para botones oscuros
+  radioText: '#000000',
 };
 
 export const darkTheme = {
@@ -36,4 +41,9 @@ export const darkTheme = {
   priorityLow: '#66BB6A',
   priorityMedium: '#FFEB3B',
   priorityHigh: '#EF5350',
+  card: '#1E1E1E',
+  inputBackground: '#2A2A2A',
+  labelColor: '#BBBBBB',
+  buttonText: '#FFFFFF', // blanco para botones oscuros
+  radioText: '#FFFFFF',
 };

@@ -20,14 +20,13 @@ export default function NewTaskModal() {
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [date, setDate] = useState(() => new Date());
   const [time, setTime] = useState(() => new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);;
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminder, setReminder] = useState<ReminderOption>('10min');
   const [repeat, setRepeat] = useState(false);
-  const { playSound } = useSound()
-  const theme = useTheme()
+  const { playSound } = useSound();
+  const theme = useTheme();
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('');
-
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -42,8 +41,8 @@ export default function NewTaskModal() {
       note,
       priority,
       date: date.toISOString(),
-      time: time.toTimeString().slice(0, 5), // HH:mm
-      reminder, 
+      time: time.toTimeString().slice(0, 5),
+      reminder,
       repeat,
       repeatInterval,
       completed: false,
@@ -59,19 +58,42 @@ export default function NewTaskModal() {
     router.back();
   };
 
-  const canSaveNewTask = title.length > 3 ? true : false;
+  const canSaveNewTask = title.length > 3;
 
   return (
-    <SafeAreaView>
-      <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
         <HStack style={styles.topBar}>
-          <Text style={{ color: theme.text, marginVertical: 20, fontWeight: 800 }} variant="titleLarge">Agregar nueva tarea</Text>
+          <Text style={{ color: theme.text, marginVertical: 20, fontWeight: '800' }} variant="titleLarge">
+            Agregar nueva tarea
+          </Text>
         </HStack>
         <VStack>
-          <TextInput label="Título" value={title} onChangeText={setTitle} style={[styles.input, { backgroundColor: theme.background, color: theme.text }]} />
-          <TextInput label="Descripción" value={description} onChangeText={setDescription} multiline numberOfLines={3} style={styles.input} />
+          <TextInput
+            label="Título"
+            value={title}
+            onChangeText={setTitle}
+            style={[styles.input, { backgroundColor: theme.inputBackground }]}
+            underlineColor={theme.primary}
+            textColor={theme.text}
+          />
+          <TextInput
+            label="Descripción"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={3}
+            style={[styles.input, { backgroundColor: theme.inputBackground }]}
+            underlineColor={theme.primary}
+            textColor={theme.text}
+          />
 
-          <Button mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
+          <Button
+            mode="outlined"
+            onPress={() => setShowDatePicker(true)}
+            style={styles.input}
+            labelStyle={{ color: theme.buttonText }}
+          >
             Seleccionar fecha: {date.toLocaleDateString()}
           </Button>
 
@@ -81,8 +103,7 @@ export default function NewTaskModal() {
               mode="date"
               display="default"
               onChange={(event, selectedDate) => {
-                setShowDatePicker(false); // ciérralo primero
-
+                setShowDatePicker(false);
                 if (event.type === 'set' && selectedDate) {
                   setDate(selectedDate);
                 }
@@ -90,7 +111,12 @@ export default function NewTaskModal() {
             />
           )}
 
-          <Button mode="outlined" onPress={() => setShowTimePicker(true)} style={styles.input}>
+          <Button
+            mode="outlined"
+            onPress={() => setShowTimePicker(true)}
+            style={styles.input}
+            labelStyle={{ color: theme.buttonText }}
+          >
             Seleccionar hora: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Button>
 
@@ -100,8 +126,7 @@ export default function NewTaskModal() {
               mode="time"
               display="default"
               onChange={(event, selectedTime) => {
-                setShowTimePicker(false); // ciérralo primero
-
+                setShowTimePicker(false);
                 if (event.type === 'set' && selectedTime) {
                   setTime(selectedTime);
                 }
@@ -109,15 +134,15 @@ export default function NewTaskModal() {
             />
           )}
 
-          <Text variant="labelLarge" style={{ marginTop: 16 }}>Recordatorio</Text>
+          <Text variant="labelLarge" style={{ marginTop: 16, color: theme.labelColor }}>Recordatorio</Text>
           <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
-            <RadioButton.Item label="5 min antes" value="5min" />
-            <RadioButton.Item label="10 min antes" value="10min" />
-            <RadioButton.Item label="30 min antes" value="30min" />
-            <RadioButton.Item label="1 día antes" value="1day" />
+            <RadioButton.Item label="5 min antes" value="5min" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="10 min antes" value="10min" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="30 min antes" value="30min" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="1 día antes" value="1day" labelStyle={{ color: theme.radioText }} />
           </RadioButton.Group>
 
-          <View style={styles.repeatSection}>
+          <View style={[styles.repeatSection, { backgroundColor: theme.card }]}>
             <Pressable
               style={styles.repeatToggle}
               onPress={() => {
@@ -137,31 +162,32 @@ export default function NewTaskModal() {
                     setRepeatInterval('daily');
                   }
                 }}
+                color={theme.primary}
               />
-              <Text style={styles.repeatLabel}>Repetir tarea</Text>
+              <Text style={[styles.repeatLabel, { color: theme.text }]}>Repetir tarea</Text>
             </Pressable>
 
             {repeat && (
               <View style={styles.repeatOptions}>
-                <Text style={styles.repeatTitle}>Frecuencia de repetición</Text>
+                <Text style={[styles.repeatTitle, { color: theme.labelColor }]}>Frecuencia de repetición</Text>
                 <RadioButton.Group
                   onValueChange={(value) => setRepeatInterval(value as RepeatInterval)}
                   value={repeatInterval}
                 >
-                  <RadioButton.Item label="Diario" value="daily" />
-                  <RadioButton.Item label="Semanal" value="weekly" />
-                  <RadioButton.Item label="Mensual" value="monthly" />
-                  <RadioButton.Item label="Anual" value="yearly" />
+                  <RadioButton.Item label="Diario" value="daily" labelStyle={{ color: theme.radioText }} />
+                  <RadioButton.Item label="Semanal" value="weekly" labelStyle={{ color: theme.radioText }} />
+                  <RadioButton.Item label="Mensual" value="monthly" labelStyle={{ color: theme.radioText }} />
+                  <RadioButton.Item label="Anual" value="yearly" labelStyle={{ color: theme.radioText }} />
                 </RadioButton.Group>
               </View>
             )}
           </View>
 
-          <Text variant="labelLarge" style={{ marginTop: 16 }}>Prioridad</Text>
+          <Text variant="labelLarge" style={{ marginTop: 16, color: theme.labelColor }}>Prioridad</Text>
           <RadioButton.Group onValueChange={(value) => setPriority(value as PriorityLevel)} value={priority}>
-            <RadioButton.Item label="Baja" value="low" />
-            <RadioButton.Item label="Media" value="medium" />
-            <RadioButton.Item label="Alta" value="high" />
+            <RadioButton.Item label="Baja" value="low" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="Media" value="medium" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="Alta" value="high" labelStyle={{ color: theme.radioText }} />
           </RadioButton.Group>
 
           <TextInput
@@ -170,14 +196,15 @@ export default function NewTaskModal() {
             onChangeText={setNote}
             multiline
             numberOfLines={2}
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.inputBackground }]}
+            underlineColor={theme.primary}
+            textColor={theme.text}
           />
           <HStack style={{ flex: 1, marginTop: 10 }}>
-            <Pressable style={[styles.pressableButton, {}]} onPress={() => router.back()}>
+            <Pressable style={styles.pressableButton} onPress={() => router.back()}>
               <Text style={[styles.textButton, { color: theme.text }]}>Cancelar</Text>
             </Pressable>
-
-            <Pressable disabled={canSaveNewTask} style={[styles.pressableButton, {}]} onPress={handleSave}>
+            <Pressable disabled={!canSaveNewTask} style={styles.pressableButton} onPress={handleSave}>
               <Text style={[styles.textButton, { color: theme.text, opacity: canSaveNewTask ? 1 : 0.5 }]}>Guardar Tarea</Text>
             </Pressable>
           </HStack>
@@ -194,36 +221,25 @@ const styles = StyleSheet.create({
   input: {
     marginTop: 12,
   },
-  repeat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  backIcon: {
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-  },
   textButton: {
     fontSize: 20,
-    fontWeight: 700
+    fontWeight: '700',
   },
   pressableButton: {
     width: 'auto',
     height: 70,
-    alignContent: 'center',
     flex: 0.5,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   repeatSection: {
     marginTop: 20,
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#f1f1f1',
   },
   repeatToggle: {
     flexDirection: 'row',
@@ -242,7 +258,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#555',
   },
-  
 });
