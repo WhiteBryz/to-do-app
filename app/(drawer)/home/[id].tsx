@@ -4,8 +4,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, RadioButton, Switch, Text, TextInput } from 'react-native-paper';
+import { Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Icon, RadioButton, Switch, Text, TextInput } from 'react-native-paper';
 
 
 export default function TaskDetail() {
@@ -109,15 +109,15 @@ export default function TaskDetail() {
       router.back();
     }
   };
-  const handleMarkComplete =async ()=>{
+  const handleMarkComplete = async () => {
     if (!task) return;
-          const updatedTask: Task = {
-            ...task,
-            completed: !task.completed,
-            updatedAt: new Date().toISOString(),
-          };
-          await updateTask(updatedTask);
-          router.back();
+    const updatedTask: Task = {
+      ...task,
+      completed: !task.completed,
+      updatedAt: new Date().toISOString(),
+    };
+    await updateTask(updatedTask);
+    router.back();
   }
 
   if (!task) {
@@ -128,32 +128,59 @@ export default function TaskDetail() {
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 100 }]}>
         {/* Título */}
-        <Text variant="titleMedium" style={styles.label}>Tarea</Text>
-        <TextInput
-          mode="outlined"
-          value={title}
-          onChangeText={setTitle}
-          style={(isEditing) ? styles.input : styles.inputdisabled}
-          disabled={!isEditing}
-        />
+        {isEditing ? (
+          <TextInput
+            value={title}
+            onChangeText={setTitle}
+            style={styles.titleTask}
+            underlineColor="transparent"
+            activeUnderlineColor="transparent"
+            theme={{ colors: { background: 'transparent' } }}
+          />
+        ) : (
+          <Text style={styles.titleTaskDisabled}>{title}</Text>
+        )}
 
         {/* Descripción */}
-        <Text variant="titleMedium" style={styles.label}>Descripción</Text>
+        <Text variant='titleSmall' style={styles.label}>Descripción</Text>
         <TextInput
           mode="outlined"
           multiline
-          numberOfLines={3}
+          numberOfLines={5}
           value={description}
           onChangeText={setDescription}
           style={(isEditing) ? styles.input : styles.inputdisabled}
           disabled={!isEditing}
         />
 
-        {/* Fecha límite */}
-        <Text variant="titleMedium" style={styles.label}>Fecha límite</Text>
-        <Pressable style={(isEditing) ? styles.simulatedInput : styles.simulatedInputDisabled} disabled={!isEditing} onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.pickerText}>{formatDate(date)}</Text>
-        </Pressable>
+        {/* Fecha y hora límite */}
+        <View style={styles.datetimeWrapper}>
+          <View style={styles.datetimeLeft}>
+            <MaterialCommunityIcons name="calendar" size={24} color="#6A6961" />
+            <Pressable
+              disabled={!isEditing}
+              style={[
+                isEditing ? styles.pressableDateTime : styles.pressableDateTimeDisabled,
+                styles.dateBox,
+              ]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.pickerText}>{formatDate(date)}</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.datetimeRight}>
+            <Text style={styles.separatorText}>a las</Text>
+            <Pressable
+              disabled={!isEditing}
+              style={isEditing ? styles.pressableDateTime : styles.pressableDateTimeDisabled}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text style={styles.pickerText}>{time}</Text>
+            </Pressable>
+          </View>
+        </View>
+
         {showDatePicker && (
           <DateTimePicker
             value={date}
@@ -168,19 +195,13 @@ export default function TaskDetail() {
           />
         )}
 
-        {/* Hora límite */}
-        <Text variant="titleMedium" style={styles.label}>Hora límite</Text>
-        <Pressable style={(isEditing) ? styles.simulatedInput : styles.simulatedInputDisabled} disabled={!isEditing} onPress={() => setShowTimePicker(true)}>
-          <Text style={styles.pickerText}>{time}</Text>
-        </Pressable>
         {showTimePicker && (
           <DateTimePicker
             value={new Date(`1970-01-01T${time}:00`)}
             mode="time"
             display="default"
             onChange={(event, selectedTime) => {
-              setShowTimePicker(false); // ciérralo primero
-
+              setShowTimePicker(false);
               if (event.type === 'set' && selectedTime) {
                 setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5));
               }
@@ -188,17 +209,75 @@ export default function TaskDetail() {
           />
         )}
 
-        {/* Prioridad */}
-        <Text variant="titleMedium" style={styles.label}>Prioridad</Text>
-        <Button
-          mode={'contained'}
-          onPress={openPriorityModal}
-          style={styles.choiceBtn}
-          disabled={!isEditing}
-        >
-          {priorityLabels[priority]} {/* 👈 Mostrar la prioridad en español */}
-        </Button>
 
+        {/* Prioridad */}
+        <View style={styles.inlineItem}>
+          <View style={styles.inlineLeft}>
+            <Icon source="flag-outline" size={20} color="#616161" />
+            <Text style={styles.inlineLabel}>Prioridad</Text>
+          </View>
+          <TouchableOpacity
+            onPress={openPriorityModal}
+            disabled={!isEditing}
+            style={isEditing ? styles.linkButton : styles.linkButtonDisabled}
+          >
+            <Text style={isEditing ? styles.linkText : styles.linkTextDisabled}>
+              {priorityLabels[priority]}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Recordatorio */}
+        <View style={styles.inlineItem}>
+          <View style={styles.inlineLeft}>
+            <Icon source="bell-outline" size={20} color="#616161" />
+            <Text style={styles.inlineLabel}>Recordatorio</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              setTempReminder(reminder);
+              setShowReminderModal(true);
+            }}
+            disabled={!isEditing}
+            style={isEditing ? styles.linkButton : styles.linkButtonDisabled}
+          >
+            <Text style={isEditing ? styles.linkText : styles.linkTextDisabled}>
+              {reminderLabels[reminder]}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+
+        <Modal visible={showReminderModal} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.dialogContent}>
+              <Text style={styles.dialogTitle}>Selecciona el recordatorio</Text>
+              <RadioButton.Group
+                onValueChange={(value) => setTempReminder(value as typeof reminder)}
+                value={tempReminder}
+              >
+                {Object.entries(reminderLabels).map(([value, label]) => (
+                  <RadioButton.Item
+                    key={value}
+                    label={label}
+                    value={value}
+                    mode="android"
+                    labelStyle={styles.radioLabel}
+                  />
+                ))}
+              </RadioButton.Group>
+              <View style={styles.dialogActions}>
+                <Button onPress={() => setShowReminderModal(false)}>Cancelar</Button>
+                <Button onPress={() => {
+                  setReminder(tempReminder);
+                  setShowReminderModal(false);
+                }}>
+                  Aceptar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
         <Modal visible={showPriorityModal} transparent animationType="fade">
           <View style={styles.modalOverlay}>
             <View style={styles.dialogContent}>
@@ -239,53 +318,6 @@ export default function TaskDetail() {
             </View>
           </View>
         </Modal>
-
-        {/* Recordatorio */}
-        <Text variant="titleMedium" style={styles.label}>Recordatorio</Text>
-        <Button
-          mode="contained"
-          onPress={() => {
-            setTempReminder(reminder);
-            setShowReminderModal(true);
-          }}
-          style={styles.choiceBtn}
-          disabled={!isEditing}
-        >
-          {reminderLabels[reminder]}
-        </Button>
-        <Modal visible={showReminderModal} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.dialogContent}>
-              <Text style={styles.dialogTitle}>Selecciona el recordatorio</Text>
-              <RadioButton.Group
-                onValueChange={(value) => setTempReminder(value as typeof reminder)}
-                value={tempReminder}
-              >
-                {Object.entries(reminderLabels).map(([value, label]) => (
-                  <RadioButton.Item
-                    key={value}
-                    label={label}
-                    value={value}
-                    mode="android"
-                    labelStyle={styles.radioLabel}
-                  />
-                ))}
-              </RadioButton.Group>
-              <View style={styles.dialogActions}>
-                <Button onPress={() => setShowReminderModal(false)}>Cancelar</Button>
-                <Button onPress={() => {
-                  setReminder(tempReminder);
-                  setShowReminderModal(false);
-                }}>
-                  Aceptar
-                </Button>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-
-
 
         {/* Repetición */}
         <View style={styles.switchRow}>
@@ -341,7 +373,7 @@ export default function TaskDetail() {
   </Modal>
 
       */}
-        {/* Nota */}
+        {/* Notas */}
         <Text variant="titleMedium" style={styles.label}>Notas</Text>
         <TextInput
           mode="outlined"
@@ -364,9 +396,9 @@ export default function TaskDetail() {
       {/* Barra de navegación inferior */}
       <View style={styles.bottomBar}>
         <Pressable style={styles.navItem} onPress={handleMarkComplete}>
-          
-          <MaterialCommunityIcons name={(task.completed)?'checkbox-marked-circle':'check-circle-outline'} size={24} color="#fff" />
-          <Text style={styles.navText}>{(task.completed)?'Marcar como \n pendiente':'Marcar como completada'}</Text>
+
+          <MaterialCommunityIcons name={(task.completed) ? 'checkbox-marked-circle' : 'check-circle-outline'} size={24} color="#fff" />
+          <Text style={styles.navText}>{(task.completed) ? 'Marcar como \n pendiente' : 'Marcar como \n completada'}</Text>
         </Pressable>
 
         <Pressable
@@ -380,7 +412,7 @@ export default function TaskDetail() {
           <Text style={styles.navText}>{isEditing ? 'Guardar' : 'Editar'}</Text>
         </Pressable>
 
-        
+
         <Pressable style={styles.navItem} onPress={handleDelete}>
           <MaterialCommunityIcons name='delete-outline' size={24} color="#fff" />
           <Text style={styles.navText}>Eliminar</Text>
@@ -391,32 +423,38 @@ export default function TaskDetail() {
 }
 
 const styles = StyleSheet.create({
+  titleTask: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    borderColor: '#6A6961',
+    borderWidth: 1,
+    borderRadius: 6,
+    backgroundColor: '#ffffff',
+  },
+
+  titleTaskDisabled: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 16,
+    backgroundColor: 'transparent',
+    padding: 10,
+  },
   input: {
     borderColor: '#6A6961',
     backgroundColor: '#ffffff',
     borderRadius: 6,
-    marginBottom: 12,
-  },
-  simulatedInput: {
-    padding: 5,
-    borderWidth: 1,
-    borderColor: '#6A6961',
-    backgroundColor: '#ffffff',
-    borderRadius: 6,
+    paddingTop: 10,
+    paddingBottom: 10,
     marginBottom: 12,
   },
   inputdisabled: {
     backgroundColor: '#E5E5E5',
     borderColor: '#d0d0d0',
     borderRadius: 6,
-  },
-  simulatedInputDisabled: {
-    padding: 5,
-    borderWidth: 1,
-    backgroundColor: '#E5E5E5',
-    color: '#d0d0d0',
-    borderColor: '#d0d0d0',
-    borderRadius: 6,
+    paddingTop: 10,
+    paddingBottom: 10,
     marginBottom: 12,
   },
   modalOverlay: {
@@ -474,10 +512,105 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   container: { padding: 20 },
-  label: { marginTop: 16, marginBottom: 4 },
+  label: {
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  underlinedText: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+  },
+  datetimeWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  separatorText: {
+    fontSize: 18,
+    marginHorizontal: 4,
+  },
+  datetimeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
+
+  datetimeRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+
+  dateBox: {
+    maxWidth: 200, // puedes ajustar esto según necesidad
+  },
+  pressableDateTime: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#6A6961',
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    fontWeight: 'bold',
+  },
+  pressableDateTimeDisabled: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#d0d0d0',
+    backgroundColor: '#E5E5E5',
+    borderRadius: 6,
+  },
   pickerText: {
     fontSize: 16,
     padding: 8,
+  },
+  inlineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  inlineLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  inlineLabel: {
+    fontSize: 18,
+    color: '#424242',
+  },
+  linkButton: {
+    paddingHorizontal: 4,
+  },
+  linkButtonDisabled: {
+    paddingHorizontal: 4,
+  },
+  linkText: {
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    borderColor: '#6A6961',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#000000',
+    backgroundColor: '#ffffff',
+    borderRadius: 4,
+  },
+  linkTextDisabled: {
+    color: '#9e9e9e',
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    borderColor: '#d0d0d0',
+    backgroundColor: '#E5E5E5',
+    fontWeight: 'bold',
+    fontSize: 16,
+    borderRadius: 4,
   },
   choiceRow: {
     flexDirection: 'row',
@@ -514,7 +647,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: 'absolute',
-    paddingBottom:30,
+    paddingBottom: 30,
     bottom: 0,
     left: 0,
     right: 0,
