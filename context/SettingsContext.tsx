@@ -13,6 +13,7 @@ type Settings = {
 
 type SettingsContextType = Settings & {
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+  resetSettings: () => void;
 };
 
 const defaultSettings: Settings = {
@@ -27,6 +28,7 @@ const defaultSettings: Settings = {
 const SettingsContext = createContext<SettingsContextType>({
   ...defaultSettings,
   setSetting: () => {},
+  resetSettings: () => {},
 });
 
 export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
@@ -40,14 +42,22 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     load();
   }, []);
 
-  const setSetting = async <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    const updated = { ...settings, [key]: value };
-    setSettings(updated);
-    await AsyncStorage.setItem('appSettings', JSON.stringify(updated));
+ const setSetting = async <K extends keyof Settings>(key: K, value: Settings[K]) => {
+  setSettings(prev => {
+    const updated = { ...prev, [key]: value };
+    AsyncStorage.setItem('appSettings', JSON.stringify(updated)); // no await aquí
+    return updated;
+  });
+};
+
+
+  const resetSettings = async () => {
+    await AsyncStorage.removeItem('appSettings');
+    setSettings(defaultSettings);
   };
 
   return (
-    <SettingsContext.Provider value={{ ...settings, setSetting }}>
+    <SettingsContext.Provider value={{ ...settings, setSetting, resetSettings }}>
       {children}
     </SettingsContext.Provider>
   );

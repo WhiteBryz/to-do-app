@@ -5,10 +5,11 @@ import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
+import { resetUserStats } from '@/store/trophiesStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 export default function Settings() {
   const router = useRouter();
@@ -17,12 +18,34 @@ export default function Settings() {
     muteNotifications,
     muteSounds,
     setSetting,
+    resetSettings,
+    username,
+    profileColor,
   } = useSettings();
 
   const { playSound } = useSound();
   const theme = useTheme();
   const toast = useCustomToast();
-  const { username, profileColor } = useSettings();
+
+  const confirmReset = () => {
+    Alert.alert(
+      '¿Eliminar todo?',
+      'Esto borrará tareas, logros y configuraciones. ¿Estás seguro?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar todo',
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncStorage.clear();
+            await resetUserStats();
+            await resetSettings();
+            toast.showToast('🗑 Todo borrado', 'Se reinició el almacenamiento local');
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <ScrollView
@@ -33,23 +56,21 @@ export default function Settings() {
     >
       <Text style={[styles.header, { color: theme.text }]}>Configuración</Text>
 
-      {/* Botón para abrir el modal de perfil */}
-<Pressable
-  style={[styles.settingRow, styles.profileRow]}
-  onPress={async () => {
-    await playSound(clickSound);
-    router.push('../../modals/profile');
-  }}
->
-  <Text style={[styles.label, { color: theme.text }]}>Editar perfil</Text>
-  <View style={[styles.avatarMini, { backgroundColor: profileColor }]}>
-    <Text style={styles.avatarTextMini}>
-      {(username?.charAt(0) || '?').toUpperCase()}
-    </Text>
-  </View>
-</Pressable>
+      <Pressable
+        style={[styles.settingRow, styles.profileRow]}
+        onPress={async () => {
+          await playSound(clickSound);
+          router.push('../../modals/profile');
+        }}
+      >
+        <Text style={[styles.label, { color: theme.text }]}>Editar perfil</Text>
+        <View style={[styles.avatarMini, { backgroundColor: profileColor }]}>
+          <Text style={styles.avatarTextMini}>
+            {(username?.charAt(0) || '?').toUpperCase()}
+          </Text>
+        </View>
+      </Pressable>
 
-      {/* Opciones de configuración */}
       <SettingSwitch
         label="Modo oscuro"
         value={darkMode}
@@ -91,6 +112,19 @@ export default function Settings() {
         }}
         theme={theme}
       />
+
+      <Pressable
+        onPress={confirmReset}
+        style={{
+          marginTop: 30,
+          padding: 12,
+          backgroundColor: '#ff4d4d',
+          borderRadius: 8,
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>Eliminar todo</Text>
+      </Pressable>
 
       <CustomToast
         visible={toast.visible}
@@ -139,35 +173,23 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
   },
-  profileButton: {
-    padding: 12,
-    borderRadius: 8,
+  profileRow: {
     marginBottom: 24,
-    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
   },
-  profileButtonText: {
+  avatarMini: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+  },
+  avatarTextMini: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
-profileRow: {
-  marginBottom: 24,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  borderRadius: 8,
-},
-
-avatarMini: {
-  width: 36,
-  height: 36,
-  borderRadius: 18,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginLeft: 12,
-},
-
-avatarTextMini: {
-  color: '#fff',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
 });
