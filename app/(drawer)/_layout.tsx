@@ -15,10 +15,17 @@ export default function DrawerLayout() {
         } }} />
         <Drawer.Screen name="charts/index" options={{ title: 'Gráficas', drawerIcon: ({color, size}) =>{
           return <Ionicons name="pie-chart" color={color} size={size} />;
-        } }} />
+        }
+        }} />
+        <Drawer.Screen name="history/index" options={{
+          title: 'Historial', drawerIcon: ({ color, size }) => {
+            return <Ionicons name="time" color={color} size={size} />;
+          }
+        }} />
         <Drawer.Screen name="settings/index" options={{ title: 'Configuración', drawerIcon: ({color, size}) =>{
           return <Ionicons name="settings" color={color} size={size} />;
-        } }} />
+        }
+        }} />
       </Drawer>
     </GestureHandlerRootView>
   );
