@@ -2,6 +2,7 @@
 Crunch App es un prototipo de aplicación móvil construido con **Expo + React Native**. Permite crear, organizar, y dar seguimiento a tareas y medir la productividad. Este README documenta los pasos necesarios para clonar, instalar y ejecutar el proyecto.
 
 >**Materia:** Diseño y Evaluación de Interfaces de Usuario 6°F
+
 >**Institución:** Facultad de Telemática, Universidad de Colima
 
 ## Dependencias principales
