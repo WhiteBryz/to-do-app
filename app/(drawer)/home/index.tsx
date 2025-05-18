@@ -2,8 +2,9 @@ import ChipFilter from "@/components/ChipFilter";
 import ProgressBarComponent from "@/components/ProgressBar";
 import TaskComponent from "@/components/Task";
 import TextDivider from "@/components/TextDivider";
+import { useTheme } from "@/context/ThemeContext";
 import { useTasks } from '@/hooks/UseTasks';
-import { updateTask } from "@/store/taskStore";
+import { addTask, updateTask } from "@/store/taskStore";
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
@@ -13,8 +14,6 @@ import { MotiView } from 'moti';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
-import { addTask } from '@/store/taskStore';
-import { useTheme } from "@/context/ThemeContext";
 
 
 export default function HomeScreen() {
@@ -34,9 +33,20 @@ export default function HomeScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            reload();
+            const checkFirstTime = async () => {
+                const stats = await getUserStats();
+
+                if (!stats.firstHome) {
+                    await updateUserStats({ firstHome: true });
+                    await evaluateTrophies(); // Revisa si se desbloqueó el trofeo
+                }
+
+                await reload(); // Carga las tareas
+            };
+
+            checkFirstTime();
         }, [])
-    );
+      );
 
     const toggleCompleted = async (id: string) => {
         try {
@@ -80,7 +90,7 @@ export default function HomeScreen() {
                 await addTask(repeatedTask);
 
                 task.repeat = false;
-                task.repeatInterval = '';
+                task.repeatInterval = 'none';
             }
 
             await updateTask(task);

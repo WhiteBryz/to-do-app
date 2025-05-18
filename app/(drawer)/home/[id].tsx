@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Icon, RadioButton, Switch, Text, TextInput } from 'react-native-paper';
+import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 
 export default function TaskDetail() {
@@ -71,7 +72,15 @@ export default function TaskDetail() {
 
 
   useEffect(() => {
-    const loadTask = async () => {
+    const init = async () => {
+      // 1. Verifica si es la primera vez en pantalla de tarea
+      const stats = await getUserStats();
+      if (!stats.firstTask) {
+        await updateUserStats({ firstTask: true });
+        await evaluateTrophies();
+      }
+
+      // 2. Carga la tarea
       const found = await findTaskById(id);
       if (found) {
         setRepeatInterval(found.repeatInterval || 'none');
@@ -86,7 +95,7 @@ export default function TaskDetail() {
         setRepeat(found.repeat);
       }
     };
-    loadTask();
+    init();
   }, [id]);
 
   const handleSave = async () => {

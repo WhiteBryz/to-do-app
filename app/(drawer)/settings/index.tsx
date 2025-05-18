@@ -5,11 +5,12 @@ import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
-import { resetUserStats } from '@/store/trophiesStore';
+import { evaluateTrophies, getUserStats, resetUserStats, updateUserStats } from '@/store/trophiesStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+
 
 export default function Settings() {
   const router = useRouter();
@@ -46,6 +47,21 @@ export default function Settings() {
       ]
     );
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkFirstVisit = async () => {
+        const stats = await getUserStats();
+
+        if (!stats.firstSettings) {
+          await updateUserStats({ firstSettings: true });
+          await evaluateTrophies();
+        }
+      };
+
+      checkFirstVisit();
+    }, [])
+  );
 
   return (
     <ScrollView

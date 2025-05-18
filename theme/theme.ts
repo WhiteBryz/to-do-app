@@ -22,6 +22,7 @@ export const lightTheme = {
   buttonText: '#000000', // blanco para botones oscuros
   radioText: '#000000',
   buttonBackground: '#6200EE', // morado claro
+  trophyGold: '#FFC107',
 };
 
 export const darkTheme = {
@@ -48,4 +49,5 @@ export const darkTheme = {
   buttonText: '#FFFFFF', // blanco para botones oscuros
   radioText: '#FFFFFF',
   buttonBackground: '#BB86FC',
+  trophyGold: '#FFD54F',
 };
