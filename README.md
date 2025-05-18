@@ -1,8 +1,8 @@
 # Crunch App - Gestor de Tareas y Productividad (TO-DO) 
 Crunch App es un prototipo de aplicación móvil construido con **Expo + React Native**. Permite crear, organizar, y dar seguimiento a tareas y medir la productividad. Este README documenta los pasos necesarios para clonar, instalar y ejecutar el proyecto.
 
->**Materia:**Diseño y Evaluación de Interfaces de Usuario 6°F
->**Institución:**Facultad de Telemática, Universidad de Colima
+>**Materia:** Diseño y Evaluación de Interfaces de Usuario 6°F
+>**Institución:** Facultad de Telemática, Universidad de Colima
 
 ## Dependencias principales
 Estas son las librerías y frameworks clave utilizados en este proyecto:
@@ -42,26 +42,32 @@ Estas son las librerías y frameworks clave utilizados en este proyecto:
 ## 🛠️ Instrucciones de instalación
 
 ### 1. Clonar el repositorio
-bash
+
+``` bash
 git clone https://github.com/WhiteBryz/to-do-app
 cd to-do-app
+```
 
-###2. Intalar dependencias
+### 2. Intalar dependencias
+``` bash
 npm install
+```
 
 Requisito: Node.js 18.x y Expo CLI
+``` bash
 npm install -g expo-cli
-
-###3. Ejecutar en modo desarrollo
+```
+### 3. Ejecutar en modo desarrollo
+``` bash
 npx expo start
-
+```
 ## ▶️ Cómo ejecutar la aplicación
 
 Al ejecutar `npm start` **o** `npx expo start` se abrirá en tu navegador el panel **Expo Dev Tools**.  
 Desde ahí puedes lanzar la app de tres maneras:
 
 ### 1. Dispositivo físico (Android) — **opción recomendada**
-1. Descarga **Expo Go** desde Google Play → <https://play.google.com/store/apps/details?id=host.exp.exponent&hl=es_MX&pli=1>  
+1. Descarga **Expo Go** desde Google Play → [Enlace para descargar Expo Go en GooglePlay](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=es_MX&pli=1)
 2. Abre Expo Go y **escanea el código QR** que aparece en Expo Dev Tools.  
 > La forma más rápida de probar en hardware real.
 
@@ -74,16 +80,17 @@ Desde ahí puedes lanzar la app de tres maneras:
 ---
 
 ### 3. Emulador Android (Windows)
-1. Instala **Android Studio** → <https://developer.android.com/studio?hl=es-419>  
+1. Instala **Android Studio** → [Enlace hacia la página oficial de Android Studio](https://developer.android.com/studio?hl=es-419)
 2. Abre **Device Manager** y **crea un AVD** con una imagen de Android (API 34 recomendada).  
 3. Asegúrate de que el emulador esté encendido.  
 4. En tu terminal del proyecto ejecuta:  
-   ```bash
+```bash
    npm start
+```
 
-**Requisito importante:** Asegúrate de tener configuradas las variables de entorno
-ANDROID_HOME               = Ruta a tu .../Android/Sdk
-PATH += %ANDROID_HOME%\emulator
-PATH += %ANDROID_HOME%\platform-tools
+**Requisito importante:** Asegúrate de tener configuradas las variables de entorno:
+`ANDROID_HOME= Ruta a tu .../Android/Sdk`
+`PATH += %ANDROID_HOME%\emulator`
+`PATH += %ANDROID_HOME%\platform-tools`
 
-**Guía oficial** Expo + AVD: https://docs.expo.dev/workflow/android-studio-emulator/
+**Guía oficial** Expo + AVD: [Guía oficial para instalar emulador de Android Studio + Expo](https://docs.expo.dev/workflow/android-studio-emulator/)
