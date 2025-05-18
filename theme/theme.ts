@@ -19,8 +19,9 @@ export const lightTheme = {
   card: '#f1f1f1',
   inputBackground: '#FFFFFF',
   labelColor: '#444',
-  buttonText: '#FFFFFF', // blanco para botones oscuros
+  buttonText: '#000000', // blanco para botones oscuros
   radioText: '#000000',
+  buttonBackground: '#6200EE', // morado claro
 };
 
 export const darkTheme = {
@@ -46,4 +47,5 @@ export const darkTheme = {
   labelColor: '#BBBBBB',
   buttonText: '#FFFFFF', // blanco para botones oscuros
   radioText: '#FFFFFF',
+  buttonBackground: '#BB86FC',
 };
