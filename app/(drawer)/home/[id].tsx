@@ -6,7 +6,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Icon, RadioButton, Switch, Text, TextInput } from 'react-native-paper';
-import { RepeatInterval } from '@/types/task'; // asegúrate de importar el tipo
 import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 
