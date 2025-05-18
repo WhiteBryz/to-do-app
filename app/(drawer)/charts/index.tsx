@@ -6,7 +6,8 @@ import {
   getProductivity,
   getWeeklyProgress,
 } from "@/utils/chartHelpers";
-import { isThisMonth, isThisWeek, parseISO } from "date-fns";
+import { format, isThisMonth, isThisWeek, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
@@ -41,6 +42,17 @@ export default function Charts() {
   }
 
   let DiaMasproductivo = getMostProductiveDay(tasks);
+  let formattedProductiveDay = "";
+
+  if (DiaMasproductivo && typeof DiaMasproductivo === "string") {
+    // Convertir string a Date y formatear en español
+    const dateObj = new Date(DiaMasproductivo);
+    if (!isNaN(dateObj.getTime())) {
+      formattedProductiveDay = format(dateObj, "EEEE d 'de' MMMM", { locale: es });
+    }
+  }
+
+  console.log("Dia mas productivo", formattedProductiveDay);
 
   const pendingTasks =
     filter === "weekly"
@@ -53,6 +65,15 @@ export default function Charts() {
       : filter === "productivity"
       ? []
       : [];
+  const filteredTasks =
+    filter === "weekly"
+      ? tasks.filter((t) => isThisWeek(parseISO(t.date), { weekStartsOn: 1 }))
+      : filter === "monthly"
+      ? tasks.filter((t) => isThisMonth(parseISO(t.date)))
+      : [];
+
+  const completedTasks = filteredTasks.filter((t) => t.completed).length;
+  const totalTasks = filteredTasks.length;
   return (
     <View style={styles.container}>
       {/* Filtros con chips */}
@@ -89,23 +110,10 @@ export default function Charts() {
         {/*Texto*/}
       </View>
       <Text style={{ fontSize: 16, marginTop: 20, alignSelf: "center" }}>
-        Tienes un progreso del {Math.floor(progress / tasks.length)}%
-      </Text>
-      <Text style={{ fontSize: 16, marginTop: 20, alignSelf: "center" }}>
-        {filter === "productivity"
-          ? `Tu dia mas productivo fue el ${DiaMasproductivo}`
-          : `Has completado ${progress} de ${
-              filter === "weekly"
-                ? tasks.filter((t) =>
-                    isThisWeek(parseISO(t.date), { weekStartsOn: 1 })
-                  ).length
-                : tasks.filter((t) => isThisMonth(parseISO(t.date))).length
-            } tus tareas ${
-              filter === "weekly"
-                ? "semanales"
-                : filter === "monthly"
-                ? "mensuales"
-                : ""
+        {filter === "productivity" && formattedProductiveDay
+          ? `Tu día más productivo fue el ${formattedProductiveDay}`
+          : `Has completado ${completedTasks} de ${totalTasks} de tus tareas ${
+              filter === "weekly" ? "semanales" : "mensuales"
             }`}
       </Text>
 
@@ -121,24 +129,36 @@ export default function Charts() {
           No tienes tareas pendientes{" "}
         </Text>
       ) : (
-        pendingTasks.map((task) => (
-          <ScrollView
-            key={task.id}
+        <>
+          <Text
             style={{
-              marginVertical: 5,
-              padding: 10,
-              backgroundColor: "#f0f0f0",
-              borderRadius: 8,
+              fontSize: 16,
+              marginTop: 20,
+              alignSelf: "center",
+              fontWeight: "bold",
             }}
           >
-            <Text style={{ fontSize: 16, fontWeight: "600" }}>
-              {task.title}
-            </Text>
-            <Text style={{ fontSize: 14, color: "#666" }}>
-              {task.date.split("T")[0]} - {task.time}
-            </Text>
-          </ScrollView>
-        ))
+            Pendientes
+          </Text>
+          {pendingTasks.map((task) => (
+            <ScrollView
+              key={task.id}
+              style={{
+                marginVertical: 5,
+                padding: 10,
+                backgroundColor: "#f0f0f0",
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                {task.title}
+              </Text>
+              <Text style={{ fontSize: 14, color: "#666" }}>
+                {task.date.split("T")[0]} - {task.time}
+              </Text>
+            </ScrollView>
+          ))}
+        </>
       )}
     </View>
   );

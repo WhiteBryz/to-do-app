@@ -1,5 +1,6 @@
 import { Task } from "@/types/task";
-import { isThisMonth, isThisWeek, parseISO } from "date-fns";
+import { isThisMonth, isThisWeek, parseISO, format } from "date-fns";
+import { es } from "date-fns/locale";
 
 export function getWeeklyProgress(tasks: Task[]): number {
   const weekTasks = tasks.filter((t) =>
@@ -13,6 +14,12 @@ export function getMonthlyProgress(tasks: Task[]): number {
   const monthTasks = tasks.filter((t) => isThisMonth(parseISO(t.date)));
   const completed = monthTasks.filter((t) => t.completed).length;
   return monthTasks.length ? (completed / monthTasks.length) * 100 : 0;
+}
+
+export function getProductivity(tasks: Task[]): number {
+  const completedTasks = tasks.filter((t) => t.completed);
+  const totalTasks = tasks.length;
+  return totalTasks ? (completedTasks.length / totalTasks) * 100 : 0;
 }
 
 export function getMostProductiveDay(tasks: Task[]): string {
