@@ -366,12 +366,7 @@ export default function TaskDetail() {
         <Pressable style={styles.navItem} onPress={handleMarkComplete}>
           
           <MaterialCommunityIcons name={(task.completed)?'checkbox-marked-circle':'check-circle-outline'} size={24} color="#fff" />
-          <Text style={styles.navText}>{(task.completed)?'Marcar pendiente':'Completada'}</Text>
-        </Pressable>
-
-        <Pressable style={styles.navItem} onPress={handleDelete}>
-          <MaterialCommunityIcons name='delete-outline' size={24} color="#fff" />
-          <Text style={styles.navText}>Eliminar</Text>
+          <Text style={styles.navText}>{(task.completed)?'Marcar como \n pendiente':'Marcar como completada'}</Text>
         </Pressable>
 
         <Pressable
@@ -383,6 +378,12 @@ export default function TaskDetail() {
         >
           <MaterialCommunityIcons name={isEditing ? 'content-save-outline' : 'pencil-outline'} size={24} color="#fff" />
           <Text style={styles.navText}>{isEditing ? 'Guardar' : 'Editar'}</Text>
+        </Pressable>
+
+        
+        <Pressable style={styles.navItem} onPress={handleDelete}>
+          <MaterialCommunityIcons name='delete-outline' size={24} color="#fff" />
+          <Text style={styles.navText}>Eliminar</Text>
         </Pressable>
       </View>
     </View>
@@ -536,5 +537,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     marginTop: 4,
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
