@@ -144,3 +144,9 @@ export const evaluateTrophies = async (): Promise<Trophy[]> => {
 
     return evaluated;
 };
+
+export const resetUserStats = async () => {
+    await AsyncStorage.removeItem('userStats');
+    await AsyncStorage.removeItem('unlockedTrophies');
+    eventBus.emit('userStatsChanged');
+  };
