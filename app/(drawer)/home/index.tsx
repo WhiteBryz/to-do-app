@@ -56,10 +56,10 @@ export default function HomeScreen() {
 
     // Definición de los encabezados personalizados para cada filtro
     const customHeaders: Record<Exclude<FilterOption, null>, string> = {
-        today: 'Tareas para hoy',
-        week: 'Tareas para esta semana',
-        month: 'Tareas para este mes',
-        later: 'Tareas para después',
+        today: 'Pendientes de hoy',
+        week: 'Para esta semana',
+        month: 'Este mes',
+        later: 'Para después...',
     };
 
     // console.log(Dimensions.get('window').width * 0.5)
