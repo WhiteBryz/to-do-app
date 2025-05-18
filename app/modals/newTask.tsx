@@ -77,11 +77,13 @@ export default function NewTaskModal() {
     // Validación de fecha y hora de la tarea y recordatorio
     if (!(remiderDateTime > new Date())) {
       // Si la fecha y hora del recordatorio son anteriores a la actual, mostramos un mensaje de error
+      console.log('remiderDateTime entro recordatorio', ()=>{})
       playSound('error')
-      toast.showToast("❌ Error", "No se puede fijar una notificación en el pasado");
+      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
     } else {
       if (!(taskDate > new Date())) {
         // Si la fecha y hora son anteriores a la actual, mostramos un mensaje de error
+         console.log('remiderDateTime entro tarea', taskDate)
         playSound('error')
         toast.showToast("❌ Error", "La fecha y hora de la tarea ya han pasado");
       } else {
