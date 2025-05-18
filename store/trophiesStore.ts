@@ -7,28 +7,28 @@ export const trophyList: Trophy[] = [
     {
         id: 'first-task',
         title: 'Primera tarea completada',
-        icon: 'checkcircle', // ✔️
+        icon: 'checkcircle',
         unlocked: false,
         condition: (stats) => stats.tasksCompleted >= 1,
     },
     {
         id: 'ten-tasks',
         title: '10 tareas completadas',
-        icon: 'staro', // ⭐ borde
+        icon: 'staro',
         unlocked: false,
         condition: (stats) => stats.tasksCompleted >= 10,
     },
     {
         id: 'fifty-tasks',
         title: '50 tareas completadas',
-        icon: 'star', // ⭐ lleno
+        icon: 'star',
         unlocked: false,
         condition: (stats) => stats.tasksCompleted >= 50,
-    },
+    }, 
     {
         id: 'hundred-tasks-completed',
         title: '100 tareas completadas',
-        icon: 'Trophy', // 🏆 AntDesign usa este nombre (sensible a mayúscula)
+        icon: 'Trophy',
         unlocked: false,
         condition: (stats) => stats.tasksCompleted >= 100,
     },
@@ -42,14 +42,14 @@ export const trophyList: Trophy[] = [
     {
         id: 'ten-created',
         title: '10 tareas creadas',
-        icon: 'plussquare', // otra opción visual
+        icon: 'pluscircleo',
         unlocked: false,
         condition: (stats) => stats.tasksCreated >= 10,
     },
     {
         id: 'hundred-created',
         title: '100 tareas creadas',
-        icon: 'trophy', // 👈 mismo que antes
+        icon: 'smile-circle',
         unlocked: false,
         condition: (stats) => stats.tasksCreated >= 100,
     },
@@ -63,23 +63,30 @@ export const trophyList: Trophy[] = [
     {
         id: 'first-settings',
         title: 'Primera vez en la pantalla de configuración',
-        icon: 'setting', // correcto en AntDesign
+        icon: 'tool', // correcto en AntDesign
         unlocked: false,
         condition: (stats) => stats.firstSettings === true,
     },
     {
         id: 'first-trophy',
         title: 'Primera vez en la pantalla de trofeos',
-        icon: 'trophy',
+        icon: 'book',
         unlocked: false,
         condition: (stats) => stats.firstTrophy === true,
     },
     {
         id: 'first-task-screen',
         title: 'Primera vez en la pantalla de tareas',
-        icon: 'checkcircleo', // ✔️ borde
+        icon: 'carryout', // ✔️ borde
         unlocked: false,
         condition: (stats) => stats.firstTask === true,
+    },
+    {
+        id: 'first-all-screen',
+        title: 'Recorriste todas las pantallas',
+        icon: 'database', // ✔️ borde
+        unlocked: false,
+        condition: (stats) => stats.firstTask === true && stats.firstHome === true && stats.firstSettings === true && stats.firstTrophy === true,
     },
   ];
 
