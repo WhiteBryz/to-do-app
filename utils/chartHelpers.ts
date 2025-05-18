@@ -1,6 +1,5 @@
 import { Task } from "@/types/task";
-import { isThisMonth, isThisWeek, parseISO, format } from "date-fns";
-import { es } from "date-fns/locale";
+import { isThisMonth, isThisWeek, parseISO } from "date-fns";
 
 export function getWeeklyProgress(tasks: Task[]): number {
   const weekTasks = tasks.filter((t) =>
@@ -37,3 +36,31 @@ export function getMostProductiveDay(tasks: Task[]): string {
 
   return mostProductiveDay[0];
 }
+
+type DiaSemana = "lunes" | "martes" | "miércoles" | "jueves" | "viernes" | "sábado" | "domingo";
+
+export function getProductivityPerDay(tasks: any[]) {
+  const productivity: Record<DiaSemana, { total: number; completed: number }> = {
+    lunes: { total: 0, completed: 0 },
+    martes: { total: 0, completed: 0 },
+    miércoles: { total: 0, completed: 0 },
+    jueves: { total: 0, completed: 0 },
+    viernes: { total: 0, completed: 0 },
+    sábado: { total: 0, completed: 0 },
+    domingo: { total: 0, completed: 0 },
+  };
+
+  const dias: DiaSemana[] = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+  tasks.forEach((task) => {
+    const date = parseISO(task.date);
+    const day = dias[date.getDay()];
+    if (day && productivity[day]) {
+      productivity[day].total++;
+      if (task.completed) productivity[day].completed++;
+    }
+  });
+
+  return productivity;
+}
+
