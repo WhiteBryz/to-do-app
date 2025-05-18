@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     progressBar: {
-        height: 10,
-        borderRadius: 4,
+        height: 20,
+        borderRadius: 12,
     },
 });
