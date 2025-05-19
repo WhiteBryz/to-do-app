@@ -17,6 +17,8 @@ export interface Task {
   completed: boolean;
   createdAt: string;
   updatedAt: string;
+  idNotification?:string; // ID de la notificación programada
+  idNotificationReminder?:string; // ID de la notificación de recordatorio
 }
 
 export const filters: { label: string; value: FilterOption }[] = [

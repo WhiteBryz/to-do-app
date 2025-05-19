@@ -1,8 +1,11 @@
+import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
+import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
+import { buildTaskDate, getReminderDate } from '@/utils/handleNotifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
@@ -21,11 +24,30 @@ export default function NewTaskModal() {
   const [time, setTime] = useState(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [reminder, setReminder] = useState<ReminderOption>('10min');
+  const [reminder, setReminder] = useState<ReminderOption>('none');
   const [repeat, setRepeat] = useState(false);
-  const { playSound } = useSound();
-  const theme = useTheme();
+  const { playSound } = useSound()
+  const theme = useTheme()
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
+  const toast = useCustomToast();
+
+  async function validateDatesOrAlert(taskDate: Date, reminderDate: Date): Promise<boolean> {
+    const now = new Date();
+
+    if (reminderDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
+      return false;
+    }
+
+    if (taskDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "La fecha y hora de la tarea ya han pasado");
+      return false;
+    }
+
+    return true;
+  }
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -36,11 +58,11 @@ export default function NewTaskModal() {
     const newTask: Task = {
       id: Date.now().toString(),
       title,
-      description,
-      note,
+      description: description.trim(),
+      note: description.trim() ? note : '',
       priority,
       date: date.toISOString(),
-      time: time.toTimeString().slice(0, 5),
+      time: time.toTimeString().slice(0, 5), // HH:mm
       reminder,
       repeat,
       repeatInterval,
@@ -49,13 +71,31 @@ export default function NewTaskModal() {
       updatedAt: new Date().toISOString(),
     };
 
-    await addTaskStorage(newTask);
+    const reminderOptions = {
+      'none': 0,
+      '5min': 5,
+      '10min': 10,
+      '30min': 30,
+      '1day': 1440, // 24 horas * 60 minutos
+    }
 
+    const taskDate = buildTaskDate(newTask.date, newTask.time);
+    const reminderDate = getReminderDate(taskDate, newTask.reminder as keyof typeof reminderOptions);
+
+    // Validar fechas y horas de tarea y recordatorio/s
+    const isValid = await validateDatesOrAlert(taskDate, reminderDate);
+    if (!isValid) return;
+
+    // Guardar en almacenamiento
+    await addTaskStorage(newTask);
     const stats = await getUserStats();
     await updateUserStats({ tasksCreated: stats.tasksCreated + 1 });
     await evaluateTrophies();
+
+    playSound(click)
     router.back();
-  };
+  }
+
 
   const canSaveNewTask = title.length > 3;
 
@@ -135,10 +175,11 @@ export default function NewTaskModal() {
 
           <Text variant="labelLarge" style={{ marginTop: 16, color: theme.labelColor }}>Recordatorio</Text>
           <RadioButton.Group onValueChange={(value) => setReminder(value as ReminderOption)} value={reminder}>
-            <RadioButton.Item label="5 min antes" value="5min" labelStyle={{ color: theme.radioText }} />
-            <RadioButton.Item label="10 min antes" value="10min" labelStyle={{ color: theme.radioText }} />
-            <RadioButton.Item label="30 min antes" value="30min" labelStyle={{ color: theme.radioText }} />
-            <RadioButton.Item label="1 día antes" value="1day" labelStyle={{ color: theme.radioText }} />
+            <RadioButton.Item label="Ninguno" value="none" />
+            <RadioButton.Item label="5 min antes" value="5min" />
+            <RadioButton.Item label="10 min antes" value="10min" />
+            <RadioButton.Item label="30 min antes" value="30min" />
+            <RadioButton.Item label="1 día antes" value="1day" />
           </RadioButton.Group>
 
           <View style={[styles.repeatSection, { backgroundColor: theme.card }]}>

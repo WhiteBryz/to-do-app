@@ -1,12 +1,14 @@
+import { useSound } from '@/hooks/useSound';
 import { deleteTask, findTaskById, updateTask } from '@/store/taskStore';
+import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
+import { buildTaskDate, deleteNotificationById, getReminderDate } from '@/utils/handleNotifications';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Icon, RadioButton, Switch, Text, TextInput } from 'react-native-paper';
-import { getUserStats, updateUserStats, evaluateTrophies } from '@/store/trophiesStore';
 
 
 export default function TaskDetail() {
@@ -29,13 +31,27 @@ export default function TaskDetail() {
   const [tempReminder, setTempReminder] = useState(reminder);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  //TODO: Implementar repetición de tareas en el newTask
+  const { playSound } = useSound();
   const [repeat, setRepeat] = useState(false);
-  /*const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
-  const [tempRepeat, setTempRepeat] = useState(repeat);
-  const [showRepeatModal, setShowRepeatModal] = useState(false);
-*/
 
+
+  async function validateDatesOrAlert(taskDate: Date, reminderDate: Date): Promise<boolean> {
+    const now = new Date();
+
+    if (reminderDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "No se puede fijar una notificación en el pasado");
+      return false;
+    }
+
+    if (taskDate <= now) {
+      playSound('error');
+      Alert.alert("❌ Error", "La fecha y hora de la tarea ya han pasado");
+      return false;
+    }
+
+    return true;
+  }
 
   // Formatea fecha a texto legible
   const formatDate = (date: Date) =>
@@ -69,6 +85,13 @@ export default function TaskDetail() {
     'yearly': 'Anual',
   };
 
+  const reminderOptions: Record<ReminderOption, number> = {
+    'none': 0,
+    '5min': 5,
+    '10min': 10,
+    '30min': 30,
+    '1day': 1440, // 24 horas * 60 minutos
+  }
 
 
   useEffect(() => {
@@ -113,12 +136,24 @@ export default function TaskDetail() {
       repeatInterval, // 👈 aquí lo agregas
       updatedAt: new Date().toISOString(),
     };
+
+    if (updatedTask.idNotification) await deleteNotificationById(task);
+
+    const taskDate = buildTaskDate(updatedTask.date, updatedTask.time);
+    const reminderDate = getReminderDate(taskDate, updatedTask.reminder as keyof typeof reminderOptions);
+
+    // Validar fechas y horas de tarea y recordatorio/s
+    const isValid = await validateDatesOrAlert(taskDate, reminderDate);
+    if (!isValid) return;
+
     await updateTask(updatedTask);
     router.back();
   };
 
   const handleDelete = async () => {
     if (task) {
+      if (task.idNotification) await deleteNotificationById(task);
+
       await deleteTask(task.id);
       router.back();
     }
@@ -365,7 +400,7 @@ export default function TaskDetail() {
                     onPress={() => setRepeatInterval(interval)}
                     style={styles.intervalButton}
                   >
-                    {repetitionLabels[interval] }
+                    {repetitionLabels[interval]}
                   </Button>
                 ))}
               </View>

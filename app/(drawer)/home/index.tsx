@@ -15,7 +15,6 @@ import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
 
-
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
@@ -57,7 +56,7 @@ export default function HomeScreen() {
 
             const task = updatedTasks.find(task => task.id === id);
             if (!task) return;
-
+            
             const isNowCompleted = task.completed;
 
             if (isNowCompleted && task.repeat && task.repeatInterval) {
