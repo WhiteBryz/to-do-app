@@ -1,16 +1,12 @@
+import { useTheme } from '@/context/ThemeContext';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
-import { useTheme } from '@/context/ThemeContext';
 
 interface ChipFilterProps {
   label: string;
   selected: boolean;
   onSelect: () => void;
-  selectedBackground: string;
-  selectedTextColor: string;
-  unselectedBackground: string;
-  unselectedTextColor: string;
 }
 
 export default function ChipFilter({ label, selected, onSelect }: ChipFilterProps) {
