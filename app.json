@@ -17,7 +17,8 @@
         "backgroundColor": "#000000"
       },
       "icon": "./assets/images/to-do-logo2.png",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.yaelperalta_1.todoapp"
     },
     "web": {
       "bundler": "metro",
