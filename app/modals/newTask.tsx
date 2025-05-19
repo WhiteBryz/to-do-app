@@ -21,7 +21,7 @@ export default function NewTaskModal() {
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [date, setDate] = useState<Date>(() => new Date());
-  const [time, setTime] = useState<string>('12:00');
+  const [time, setTime] = useState<Date>(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminder, setReminder] = useState<ReminderOption>('none');
@@ -105,7 +105,7 @@ export default function NewTaskModal() {
       note: description.trim() ? note : '',
       priority,
       date: date.toISOString(),
-      time: time, // HH:mm
+      time: time.toTimeString().slice(0, 5), // HH:mm
       reminder,
       repeat,
       repeatInterval,
@@ -154,7 +154,7 @@ export default function NewTaskModal() {
           <VStack >
             <Text variant="titleMedium" style={[styles.label, { color: theme.text, marginTop: 20 }]}>Título de la tarea</Text>
             <TextInput
-            placeholder='Escribe el título de tu tarea...'
+              placeholder='Escribe el título de tu tarea...'
               value={title}
               onChangeText={setTitle}
               style={[{ marginBottom: 20 }, { backgroundColor: theme.inputBackground, marginBottom: 16 }]}
@@ -198,7 +198,7 @@ export default function NewTaskModal() {
                 style={[styles.pressableDateTime, { backgroundColor: theme.inputBackground }]}
                 onPress={() => setShowTimePicker(true)}
               >
-                <Text style={[styles.pickerText, { color: theme.text }]}>{time}</Text>
+                <Text style={[styles.pickerText, { color: theme.text }]}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5)}</Text>
               </Pressable>
             </View>
           </View>
@@ -219,13 +219,13 @@ export default function NewTaskModal() {
 
           {showTimePicker && (
             <DateTimePicker
-              value={new Date(`1970-01-01T${time}:00`)}
+              value={time}
               mode="time"
               display="default"
               onChange={(event, selectedTime) => {
                 setShowTimePicker(false);
                 if (event.type === 'set' && selectedTime) {
-                  setTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(0, 5));
+                  setTime(selectedTime);
                 }
               }}
             />
@@ -262,7 +262,7 @@ export default function NewTaskModal() {
               }}
               style={[styles.linkButton]}
             >
-              <Text style={[styles.linkText, { color: theme.background, backgroundColor: theme.buttonBackground}]}>
+              <Text style={[styles.linkText, { color: theme.background, backgroundColor: theme.buttonBackground }]}>
                 {reminderLabels[reminder]}
               </Text>
             </TouchableOpacity>
@@ -270,8 +270,8 @@ export default function NewTaskModal() {
 
           <Modal visible={showReminderModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
-              <View style={styles.dialogContent}>
-                <Text style={styles.dialogTitle}>Selecciona el recordatorio</Text>
+              <View style={[styles.dialogContent, { backgroundColor: theme.card }]}>
+                <Text style={[styles.dialogTitle, { color: theme.text }]}>Selecciona el recordatorio</Text>
                 <RadioButton.Group
                   onValueChange={(value) => setTempReminder(value as typeof reminder)}
                   value={tempReminder}
@@ -282,16 +282,18 @@ export default function NewTaskModal() {
                       label={label}
                       value={value}
                       mode="android"
-                      labelStyle={styles.radioLabel}
+                      labelStyle={[styles.radioLabel, { color: theme.text }]}
                     />
                   ))}
                 </RadioButton.Group>
                 <View style={styles.dialogActions}>
-                  <Button onPress={() => setShowReminderModal(false)}>Cancelar</Button>
+                  <Button onPress={() => setShowReminderModal(false)}
+                    labelStyle={{ color: theme.buttonText }}>Cancelar</Button>
                   <Button onPress={() => {
                     setReminder(tempReminder);
                     setShowReminderModal(false);
-                  }}>
+                  }}
+                    labelStyle={{ color: theme.primary }}>
                     Aceptar
                   </Button>
                 </View>
@@ -300,8 +302,8 @@ export default function NewTaskModal() {
           </Modal>
           <Modal visible={showPriorityModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
-              <View style={styles.dialogContent}>
-                <Text style={styles.dialogTitle}>Selecciona la prioridad</Text>
+              <View style={[styles.dialogContent, { backgroundColor: theme.card }]}>
+                <Text style={[styles.dialogTitle, { color: theme.text }]}>Selecciona la prioridad</Text>
 
                 <RadioButton.Group
                   onValueChange={(newValue) => setTempPriority(newValue as PriorityLevel)}
@@ -310,7 +312,7 @@ export default function NewTaskModal() {
                   {(['low', 'medium', 'high'] as PriorityLevel[]).map(level => (
                     <RadioButton.Item
                       key={level}
-                      labelStyle={styles.radioLabel}
+                      labelStyle={[styles.radioLabel, { color: theme.text }]}
                       label={priorityLabels[level]}
                       value={level}
                       mode="android"
@@ -322,6 +324,8 @@ export default function NewTaskModal() {
                   <Button
                     onPress={() => setShowPriorityModal(false)}
                     compact
+                    labelStyle={{ color: theme.buttonText }}
+                    style={{ marginLeft: 8 }}
                   >
                     Cancelar
                   </Button>
@@ -331,6 +335,7 @@ export default function NewTaskModal() {
                       setShowPriorityModal(false);
                     }}
                     compact
+                    labelStyle={{ color: theme.buttonText }}
                   >
                     Aceptar
                   </Button>
@@ -371,7 +376,7 @@ export default function NewTaskModal() {
                       key={interval}
                       mode={repeatInterval === interval ? 'contained' : 'outlined'}
                       onPress={() => setRepeatInterval(interval)}
-                      style={[styles.intervalButton, {backgroundColor: repeatInterval === interval ? theme.buttonBackground : theme.background}]}
+                      style={[styles.intervalButton, { backgroundColor: repeatInterval === interval ? theme.buttonBackground : theme.background }]}
                       textColor={repeatInterval === interval ? theme.background : theme.secondaryText} // Cambia el color de fondo y texto según el tema
                     >
                       {repetitionLabels[interval]}
@@ -492,12 +497,10 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   dialogContent: {
-    backgroundColor: 'white',
     borderRadius: 8,
     padding: 24,
     width: '85%',
