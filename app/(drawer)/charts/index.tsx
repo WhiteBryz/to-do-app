@@ -1,22 +1,22 @@
 import ChipFilter from "@/components/ChipFilter";
+import ProgressBarComponent from "@/components/ProgressBar";
 import { useTasks } from "@/hooks/UseTasks";
 import {
   getMonthlyProgress,
   getMostProductiveDay,
   getProductivity,
-  getWeeklyProgress,
   getProductivityPerDay,
+  getWeeklyProgress,
 } from "@/utils/chartHelpers";
 import { format, isThisMonth, isThisWeek, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { ScrollView } from "react-native-gesture-handler";
+import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import { styles } from "./styles";
-import ProgressBarComponent from "@/components/ProgressBar";
-import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-import { useWindowDimensions } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 // Opciones de filtro para las gráficas
 const graphicFilters = [
@@ -26,11 +26,11 @@ const graphicFilters = [
 ];
 // OPciones de filtro para las gráficas
 export default function Charts() {
+  const theme = useTheme();
   const [filter, setFilter] = useState<
     "weekly" | "productivity" | "monthly" | null
   >("weekly");
   const { tasks } = useTasks();
-
   let progress = 0;
   let label = "";
   // Definición de la variable de progreso y su etiqueta
@@ -90,7 +90,9 @@ export default function Charts() {
   const ProductivityRoute = () => (
     <ScrollView
       style={{ marginTop: 10 }}
-      contentContainerStyle={{ paddingBottom: 100 }}
+      contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
     >
       {formattedProductiveDay && (
         <Text
@@ -99,6 +101,7 @@ export default function Charts() {
             alignSelf: "center",
             marginBottom: 20,
             fontWeight: "bold",
+            color: theme.text,
           }}
         >
           Tu día más productivo fue el {formattedProductiveDay}
@@ -112,11 +115,18 @@ export default function Charts() {
               marginBottom: 8,
               textTransform: "capitalize",
               fontSize: 16,
+              color: theme.text,
             }}
           >
             {day}
           </Text>
-          <ProgressBarComponent completed={data.completed} total={data.total} />
+          <ProgressBarComponent
+            completed={data.completed}
+            total={data.total}
+            barColor={theme.primary}
+            backgroundColor={theme.progressBackground}
+            textColor={theme.progressText}
+          />
         </View>
       ))}
     </ScrollView>
@@ -124,9 +134,21 @@ export default function Charts() {
 
   // Escena: Actividades pendientes
   const PendingRoute = () => (
-    <ScrollView style={{ marginTop: 10 }}>
+    <ScrollView
+      style={{ marginTop: 10 }}
+      contentContainerStyle={{ paddingBottom: 500 }}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
+    >
       {pendingTasks.length === 0 ? (
-        <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 16,
+            fontWeight: "bold",
+            color: theme.text,
+          }}
+        >
           No tienes tareas pendientes
         </Text>
       ) : (
@@ -138,14 +160,16 @@ export default function Charts() {
                 marginVertical: 5,
                 marginHorizontal: 16,
                 padding: 10,
-                backgroundColor: "#f0f0f0",
+                backgroundColor: theme.taskCardBackground,
                 borderRadius: 8,
               }}
             >
-              <Text style={{ fontSize: 16, fontWeight: "600" }}>
+              <Text
+                style={{ fontSize: 16, fontWeight: "600", color: theme.text }}
+              >
                 {task.title}
               </Text>
-              <Text style={{ fontSize: 14, color: "#666" }}>
+              <Text style={{ fontSize: 14, color: theme.dateText }}>
                 {task.date.split("T")[0]} - {task.time}
               </Text>
             </View>
@@ -161,60 +185,61 @@ export default function Charts() {
   });
 
   return (
-    <View style={styles.container}>
-      {/* Filtros con chips */}
-      <View style={styles.chipContainer}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.chipContainer, { marginBottom: 8 }]}>
         {graphicFilters.map((f) => (
           <ChipFilter
             key={f.value}
             label={f.label}
             selected={filter === f.value}
-            onSelect={() =>
-              setFilter(f.value as "weekly" | "monthly" | "productivity")
-            } // toggle
+            onSelect={() => setFilter(f.value as "weekly" | "monthly" | "productivity")}
+            selectedBackground={theme.chipSelected}
+            selectedTextColor={theme.chipText}
+            unselectedBackground={theme.chipUnselectedBackground}
+            unselectedTextColor={theme.chipUnselectedText}
           />
         ))}
       </View>
 
-      {/* Visualización del progreso */}
-      <View style={styles.progressContainer}>
-        <Text style={styles.labelText}>{label}</Text>
+      <View style={[styles.progressContainer, { marginTop: 0 }]}>
+        <Text style={[styles.labelText, { color: theme.text }]}>{label}</Text>
         <AnimatedCircularProgress
           size={200}
           width={15}
           fill={progress}
-          tintColor="#6850A6"
-          backgroundColor="#3d5875"
+          tintColor={theme.primary}
+          backgroundColor={theme.progressBackground}
           lineCap="round"
           rotation={180}
         >
-          {(fill) => (
-            <Text style={styles.percentageText}>{Math.round(fill)}%</Text>
+          {(fill: number) => (
+            <Text style={[styles.percentageText, { color: theme.progressText }]}>
+              {Math.round(fill)}%
+            </Text>
           )}
         </AnimatedCircularProgress>
-
-        {/*Texto*/}
       </View>
-      <Text style={{ fontSize: 16, marginTop: 20, alignSelf: "center" }}>
-        {filter === "productivity" && (
+
+      {filter === "productivity" && (
+        <View style={{ flex: 1, marginTop: 20 }}>
           <TabView
             navigationState={{ index, routes }}
             renderScene={renderScene}
             onIndexChange={setIndex}
             initialLayout={{ width: layout.width }}
-            renderTabBar={(props: []) => (
+            renderTabBar={(props) => (
               <TabBar
                 {...props}
-                indicatorStyle={{ backgroundColor: "#6850A6" }}
-                style={{ backgroundColor: "#f5f5f5" }}
-                activeColor="#6850A6"
-                inactiveColor="#999"
+                indicatorStyle={{ backgroundColor: theme.primary }}
+                style={{ backgroundColor: theme.background }}
+                activeColor={theme.primary}
+                inactiveColor={theme.secondaryText}
                 labelStyle={{ fontSize: 14, fontWeight: "bold" }}
               />
             )}
           />
-        )}
-      </Text>
+        </View>
+      )}
     </View>
   );
 }

@@ -7,6 +7,10 @@ interface ChipFilterProps {
   label: string;
   selected: boolean;
   onSelect: () => void;
+  selectedBackground: string;
+  selectedTextColor: string;
+  unselectedBackground: string;
+  unselectedTextColor: string;
 }
 
 export default function ChipFilter({ label, selected, onSelect }: ChipFilterProps) {
@@ -48,3 +52,5 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 });
+
+
