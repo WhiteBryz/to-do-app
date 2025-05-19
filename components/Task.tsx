@@ -1,10 +1,10 @@
+import { useTheme } from '@/context/ThemeContext';
 import { Task } from '@/types/task';
 import formatCustomDateTime from '@/utils/formatCustomDateTime';
 import { HStack, VStack } from '@react-native-material/core';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import IconButton from './IconCompleteTask';
-import { useTheme } from '@/context/ThemeContext';
 
 interface TaskComponentProps {
     task: Task;
@@ -16,9 +16,9 @@ export default function TaskComponent(props: TaskComponentProps) {
     const theme = useTheme();
 
     const PriorityLevel = {
-        'low': { title: 'Bajo', color: theme.priorityLow },
-        'medium': { title: 'Medio', color: theme.priorityMedium },
-        'high': { title: 'Alto', color: theme.priorityHigh },
+        'low': { title: 'Baja', color: theme.priorityLow },
+        'medium': { title: 'Media', color: theme.priorityMedium },
+        'high': { title: 'Alta', color: theme.priorityHigh },
     };
 
     const styles = StyleSheet.create({

@@ -1,6 +1,5 @@
 import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
-import { useCustomToast } from '@/hooks/useCustomToast';
 import { useSound } from '@/hooks/useSound';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
@@ -29,7 +28,6 @@ export default function NewTaskModal() {
   const { playSound } = useSound()
   const theme = useTheme()
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
-  const toast = useCustomToast();
 
   async function validateDatesOrAlert(taskDate: Date, reminderDate: Date): Promise<boolean> {
     const now = new Date();
