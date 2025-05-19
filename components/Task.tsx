@@ -76,7 +76,7 @@ export default function TaskComponent(props: TaskComponentProps) {
                 <Text style={styles.taskDateTime}>{formatCustomDateTime(task.date, task.time)}</Text>
             </VStack>
             <VStack style={styles.taskPriorityContainer}>
-                <Text style={[styles.taskPriority, { backgroundColor: PriorityLevel[task.priority]?.color || theme.priorityLow }]}>
+                <Text style={[styles.taskPriority, { backgroundColor: PriorityLevel[task.priority]?.color || theme.priorityLow }, {color: theme.background}]}>
                     {PriorityLevel[task.priority]?.title || 'Sin prioridad'}
                 </Text>
             </VStack>

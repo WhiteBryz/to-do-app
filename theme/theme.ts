@@ -14,7 +14,7 @@ export const lightTheme = {
   taskCardBackground: '#FAF0FA',
   dateText: '#FF6600',
   priorityLow: '#81C784',
-  priorityMedium: '#FFD54F',
+  priorityMedium: '#d3992e',
   priorityHigh: '#E57373',
   card: '#f1f1f1',
   inputBackground: '#FFFFFF',
