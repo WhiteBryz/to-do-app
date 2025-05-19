@@ -302,7 +302,7 @@ export default function NewTaskModal() {
           </Modal>
           <Modal visible={showPriorityModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
-              <View style={[styles.dialogContent, { backgroundAttachment: theme.card }]}>
+              <View style={[styles.dialogContent, { backgroundColor: theme.card }]}>
                 <Text style={[styles.dialogTitle, { color: theme.text }]}>Selecciona la prioridad</Text>
 
                 <RadioButton.Group
