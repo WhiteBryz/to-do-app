@@ -15,8 +15,9 @@ import { Text, View, useWindowDimensions } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { ScrollView } from "react-native-gesture-handler";
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
-import { styles } from "./styles";
 import { useTheme } from "@/context/ThemeContext";
+import ChipFilterAlternative from "@/components/ChipFilter2";
+import { StyleSheet } from "react-native";
 
 // Opciones de filtro para las gráficas
 const graphicFilters = [
@@ -123,9 +124,6 @@ export default function Charts() {
           <ProgressBarComponent
             completed={data.completed}
             total={data.total}
-            barColor={theme.primary}
-            backgroundColor={theme.progressBackground}
-            textColor={theme.progressText}
           />
         </View>
       ))}
@@ -188,7 +186,7 @@ export default function Charts() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.chipContainer, { marginBottom: 8 }]}>
         {graphicFilters.map((f) => (
-          <ChipFilter
+          <ChipFilterAlternative
             key={f.value}
             label={f.label}
             selected={filter === f.value}
@@ -234,7 +232,6 @@ export default function Charts() {
                 style={{ backgroundColor: theme.background }}
                 activeColor={theme.primary}
                 inactiveColor={theme.secondaryText}
-                labelStyle={{ fontSize: 14, fontWeight: "bold" }}
               />
             )}
           />
@@ -243,3 +240,31 @@ export default function Charts() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 8,
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginVertical: 16,
+    gap: 8, // Espacio entre chips
+  },
+  progressContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  labelText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+  percentageText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+});
