@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "to-do-app",
+    "name": "To-Do App",
     "slug": "to-do-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/to-do-logo2.png",
     "scheme": "todoapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,25 +13,27 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/to-do-logo2.png",
+        "backgroundColor": "#000000"
       },
+      "icon": "./assets/images/to-do-logo2.png",
       "edgeToEdgeEnabled": true
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/to-do-logo2.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/to-do-logo2.png",
+          "imageWidth": 512,
+          "imageHeight": 512,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000000"
         }
       ]
     ],
