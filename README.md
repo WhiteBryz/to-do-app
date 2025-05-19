@@ -95,3 +95,16 @@ Desde ahí puedes lanzar la app de tres maneras:
 `PATH += %ANDROID_HOME%\platform-tools`
 
 **Guía oficial** Expo + AVD: [Guía oficial para instalar emulador de Android Studio + Expo](https://docs.expo.dev/workflow/android-studio-emulator/)
+
+---
+
+### 4. Instalar la APK directamente (Android)
+
+Otra opción **altamente recomendada** es instalar la app directamente desde un archivo `.apk` generado con EAS Build.
+
+📲 Puedes descargarla desde el siguiente enlace:  
+🔗 [Descargar APK de la app (build Expo)](https://expo.dev/accounts/yaelperalta_1/projects/to-do-app/builds/52866814-646c-4f1e-8b6c-76b90fb83373)
+
+> Al hacer clic en el botón **Install**, se descargará la APK en tu dispositivo.  
+> Solo necesitas abrirla para instalarla (puede pedirte habilitar la instalación desde fuentes desconocidas).
+
