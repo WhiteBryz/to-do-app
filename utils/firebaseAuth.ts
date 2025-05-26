@@ -1,8 +1,8 @@
 // utils/firebaseAuth.ts
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { firebaseApp } from './firebaseConfig';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 
-const auth = getAuth(firebaseApp);
+// const auth = getAuth(firebaseApp);
 
 export const getCurrentUser = (): Promise<User | null> => {
   return new Promise((resolve) => {

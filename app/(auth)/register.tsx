@@ -1,5 +1,6 @@
 // app/(auth)/register.tsx
 import { useTheme } from "@/context/ThemeContext";
+import { auth } from "@/utils/firebaseConfig"; // Asegúrate de que la ruta es correcta
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -7,7 +8,6 @@ import { useState } from "react";
 import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
 import { Button, HelperText, Text, TextInput } from "react-native-paper";
 import Toast from "react-native-toast-message";
-import { auth } from "../../utils/firebaseConfig"; // Asegúrate de que la ruta es correcta
 
 export default function RegisterScreen() {
     const router = useRouter();

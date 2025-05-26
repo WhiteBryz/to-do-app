@@ -17,7 +17,8 @@ export default function LoginScreen() {
     const handleLogin = async () => {
         try {
             setError("");
-            await login(email, password);
+            const userLogin =  await login(email, password);
+            console.log(userLogin)
             router.replace("/(drawer)/home");
         } catch (err: any) {
             setError((err.message) || "Ocurrió un error");
