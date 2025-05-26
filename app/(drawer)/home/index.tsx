@@ -124,7 +124,7 @@ export default function HomeScreen() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background }}>
+        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background}}>
             <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>
                 {filter ? customHeaders[filter] : ''}
             </Text>
@@ -180,7 +180,7 @@ export default function HomeScreen() {
                     position: 'absolute',
                     backgroundColor: theme.primary,
                     borderRadius: 50,
-                    bottom: 16,
+                    bottom: 48,
                     left: Dimensions.get('window').width - 56 - 16,
                 }}
             />

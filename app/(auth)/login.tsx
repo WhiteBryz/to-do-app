@@ -2,7 +2,7 @@
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
 import { Button, HelperText, Text, TextInput } from "react-native-paper";
 import { login } from "../../services/authService";
 
@@ -25,42 +25,44 @@ export default function LoginScreen() {
     };
     return (
         <View style={{ padding: 24, justifyContent: "center", flex: 1 }}>
-            <Text variant="headlineMedium" style={{ marginBottom: 24 }}>
-                Iniciar sesión
-            </Text>
-            <Text variant="titleMedium" style={{ color: theme.text }}>Correo electrónico</Text>
-            <TextInput
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
-                textColor={theme.text}
-                underlineColor="transparent"
-                activeUnderlineColor="transparent"
-            />
-            <Text variant="titleMedium" style={{ color: theme.text }}>Contraseña</Text>
-            <TextInput
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
-                textColor={theme.text}
-                underlineColor="transparent"
-                activeUnderlineColor="transparent"
-            />
-            <Text
-                style={{ marginBottom: 16, textAlign: "center" }}
-                onPress={() => router.replace("/(auth)/register")}
-            >
-                ¿No tienes cuenta? <Text style={{ color: theme.primary }}>Regístrate</Text>
-            </Text>
-            {error ? <HelperText type="error" visible={true}>{error}</HelperText> : null}
+            <KeyboardAvoidingView behavior="padding">
+                <Text variant="headlineMedium" style={{ marginBottom: 24, color: theme.primary, fontWeight: 700}}>
+                    Iniciar sesión
+                </Text>
+                <Text variant="titleMedium" style={{ color: theme.text }}>Correo electrónico</Text>
+                <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
+                    textColor={theme.text}
+                    underlineColor="transparent"
+                    activeUnderlineColor="transparent"
+                />
+                <Text variant="titleMedium" style={{ color: theme.text }}>Contraseña</Text>
+                <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
+                    textColor={theme.text}
+                    underlineColor="transparent"
+                    activeUnderlineColor="transparent"
+                />
+                <Text
+                    style={{ marginBottom: 16, textAlign: "center", color: theme.text }}
+                    onPress={() => router.replace("./register")}
+                >
+                    ¿No tienes cuenta? <Text style={{ color: theme.primary, textDecorationLine:'underline' }}>Regístrate</Text>
+                </Text>
+                {error ? <HelperText type="error" visible={true}>{error}</HelperText> : null}
 
 
-            <Button mode="contained" onPress={handleLogin} style={{ backgroundColor: theme.primary }}>
-                Entrar
-            </Button>
+                <Button mode="contained" onPress={handleLogin} textColor={theme.background} style={{ backgroundColor: theme.buttonBackground }}>
+                    Entrar
+                </Button>
+            </KeyboardAvoidingView>
         </View>
     );
 }
