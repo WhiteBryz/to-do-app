@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { useSound } from '@/hooks/useSound';
 import '../../utils/debug';
 
 
 export default function DrawerLayout() {
   const theme = useTheme();
+  const {playSound} = useSound()
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
