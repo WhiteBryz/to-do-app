@@ -1,4 +1,4 @@
-package com.yaelperalta_1.todoapp
+package com.todoapp.firebase
 
 import android.app.Application
 import android.content.res.Configuration

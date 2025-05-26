@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yaelperalta-1.todoapp"
+      "bundleIdentifier": "com.todoapp.firebase",
+      "googleServicesFile": "GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +20,8 @@
       },
       "icon": "./assets/images/to-do-logo2.png",
       "edgeToEdgeEnabled": true,
-      "package": "com.yaelperalta_1.todoapp"
+      "package": "com.todoapp.firebase",
+      "googleServicesFile": "google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -37,7 +39,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#000000"
         }
-      ]
+      ],
+      "expo-build-properties",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ],
     "experiments": {
       "typedRoutes": true

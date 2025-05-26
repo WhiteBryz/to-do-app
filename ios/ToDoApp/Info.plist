@@ -28,7 +28,13 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>todoapp</string>
-          <string>com.yaelperalta-1.todoapp</string>
+          <string>com.todoapp.firebase</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.161585821369-73akme2k8kfvfjgj4goft83600h94vjo</string>
         </array>
       </dict>
     </array>

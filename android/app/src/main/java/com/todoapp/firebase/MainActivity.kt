@@ -1,4 +1,4 @@
-package com.yaelperalta_1.todoapp
+package com.todoapp.firebase
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
