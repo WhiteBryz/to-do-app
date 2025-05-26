@@ -10,10 +10,14 @@ import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link, useFocusEffect, useRouter } from 'expo-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { MotiView } from 'moti';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
+import { firebaseApp } from '../../../utils/firebaseConfig'; // Asegúrate de que la ruta es correcta
+
+
 
 export default function HomeScreen() {
     const { tasks, reload, setTasks } = useTasks();
@@ -30,6 +34,16 @@ export default function HomeScreen() {
     const hasTasksCompleted = filteredTasksCompleted.length > 0;
     const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
 
+    useEffect(() => {
+    const auth = getAuth(firebaseApp); // ✅ Pasando la app correctamente
+    const unsubscribe = onAuthStateChanged(auth, user => {
+        if (!user) {
+            router.replace("/login");
+        }
+    });
+
+    return unsubscribe;
+}, []);
     useFocusEffect(
         useCallback(() => {
             const checkFirstTime = async () => {
