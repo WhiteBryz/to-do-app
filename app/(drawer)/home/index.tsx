@@ -38,7 +38,7 @@ export default function HomeScreen() {
     const auth = getAuth(firebaseApp); // ✅ Pasando la app correctamente
     const unsubscribe = onAuthStateChanged(auth, user => {
         if (!user) {
-            router.replace("/login");
+            router.replace("../(auth)/login");
         }
     });
 

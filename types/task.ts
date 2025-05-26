@@ -5,6 +5,8 @@ export type RepeatInterval = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface Task {
   id: string;
+  createdBy: string, // ID del usuario que creó la tarea
+  assignedTo?: string; // ID del usuario
   title: string;
   description: string;
   note: string;
@@ -15,6 +17,7 @@ export interface Task {
   repeat: boolean;
   repeatInterval?: RepeatInterval; // ← nuevo campo opcional
   completed: boolean;
+  completedBy?: string;
   createdAt: string;
   updatedAt: string;
   idNotification?:string; // ID de la notificación programada

@@ -64,7 +64,6 @@ export function CustomDrawer(props: any) {
             {text:"Cancelar", style: "cancel"},
             {text: "Aceptar", style: "default", onPress:()=>{
               logout();
-
             }}
           ])
         }} />
