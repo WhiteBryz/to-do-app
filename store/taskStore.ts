@@ -1,8 +1,13 @@
 import { Task } from '@/types/task';
+import { auth, fireStore } from '@/utils/firebaseConfig';
 import { deleteNotificationById, scheduleTodoNotification } from '@/utils/handleNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, deleteDoc, doc, setDoc } from 'firebase/firestore';
+
 
 const STORAGE_KEY = 'tasks';
+
+const getUserId = () => auth.currentUser?.uid;
 
 export const getAllTasks = async (): Promise<Task[]> => {
   const json = await AsyncStorage.getItem(STORAGE_KEY);
@@ -15,38 +20,57 @@ export const saveAllTasks = async (tasks: Task[]) => {
 
 export const addTask = async (task: Task) => {
   // Añadir lógica para programar la notificación
-  if(task.reminder !== 'none') {
+  if (task.reminder !== 'none') {
     task.idNotificationReminder = await scheduleTodoNotification({ task, isReminder: true }) as string;
   }
   task.idNotification = await scheduleTodoNotification({ task, isReminder: false }) as string;
-  
+
   // Guardar la tarea en el almacenamiento
   const tasks = await getAllTasks();
   tasks.push(task);
   await saveAllTasks(tasks);
+
+  const uid = getUserId();
+  if (uid) {
+    console.log("entró a crear tarea")
+    const taskRef = doc(collection(fireStore, 'users', uid, 'tasks'), task.id);
+    await setDoc(taskRef, task)
+  }
 };
 
 export const updateTask = async (updatedTask: Task) => {
   // Cancelar la notificación anterior
   await deleteNotificationById(updatedTask);
 
-  if(!updatedTask.completed){
+  if (!updatedTask.completed) {
     // Añadir lógica para programar la notificación
-    if(updatedTask.reminder !== 'none') {
-      updatedTask.idNotificationReminder = await scheduleTodoNotification({ task:updatedTask, isReminder: true }) as string;
+    if (updatedTask.reminder !== 'none') {
+      updatedTask.idNotificationReminder = await scheduleTodoNotification({ task: updatedTask, isReminder: true }) as string;
     }
-    updatedTask.idNotification = await scheduleTodoNotification({ task:updatedTask, isReminder: false }) as string;
+    updatedTask.idNotification = await scheduleTodoNotification({ task: updatedTask, isReminder: false }) as string;
   }
 
   const tasks = await getAllTasks();
   const newTasks = tasks.map(t => (t.id === updatedTask.id ? updatedTask : t));
   await saveAllTasks(newTasks);
+
+  const uid = getUserId();
+  if (uid) {
+    const taskRef = doc(collection(fireStore, 'users', uid, 'tasks'), updatedTask.id);
+    await setDoc(taskRef, updatedTask);
+  }
 };
 
 export const deleteTask = async (id: string) => {
   const tasks = await getAllTasks();
   const newTasks = tasks.filter(t => t.id !== id);
   await saveAllTasks(newTasks);
+
+  const uid = getUserId();
+  if (uid) {
+    const taskRef = doc(collection(fireStore, 'users', uid, 'tasks'), id);
+    await deleteDoc(taskRef);
+  }
 };
 
 export const findTaskById = async (id: string): Promise<Task | undefined> => {
