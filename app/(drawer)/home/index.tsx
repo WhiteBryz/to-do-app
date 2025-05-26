@@ -115,7 +115,7 @@ export default function HomeScreen() {
                 {filter ? customHeaders[filter] : ''}
             </Text>
 
-            <ProgressBarComponent completed={completedTasks} total={filteredTasks.length} />
+            <ProgressBarComponent completed={filteredTasksCompleted.length} total={filteredTasks.length} />
 
             <View style={{ height: "auto", marginBottom: 10 }}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 8 }}>
