@@ -40,7 +40,11 @@
           "backgroundColor": "#000000"
         }
       ],
-      "expo-build-properties",
+      ["expo-build-properties", {
+        "ios": {
+          "useFrameworks": "static"
+        }
+      }],
       "@react-native-firebase/app",
       "@react-native-firebase/auth"
     ],
