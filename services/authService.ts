@@ -25,6 +25,7 @@ export const logout = async () => {
 
 export const getUserId = (): string | null => {
   const user = getAuth().currentUser;
+  
   if(!user){
     throw new Error('Usuario no loggeado');
   }

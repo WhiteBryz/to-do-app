@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
+import { Alert, KeyboardAvoidingView, StyleSheet, View } from "react-native";
 import { Button, HelperText, Text, TextInput } from "react-native-paper";
 import Toast from "react-native-toast-message";
 
@@ -15,11 +15,22 @@ export default function RegisterScreen() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [passwordToConfirm, setPasswordToConfirm] = useState("");
     const [name, setName] = useState("");
     const [error, setError] = useState("");
     const theme = useTheme();
 
     const handleRegister = async () => {
+        if (!name || !email || !password || !passwordToConfirm) {
+            return Alert.alert("Error", "Favor de llenar todos los campos para registrar el usuario", [
+                { text: "Aceptar" }
+            ])
+        }
+
+        if(!(password === passwordToConfirm)){
+            return setError("Las contaseñas no coinciden");
+        }
+
         try {
             setError("");
 
@@ -30,7 +41,7 @@ export default function RegisterScreen() {
                 id: user.uid,
                 createdAt: new Date().toISOString(), // ISO string
                 updatedAt: new Date().toISOString(),
-                name: "",
+                name: name,
                 email: email,
                 userRole: 'worker'
             }
@@ -128,6 +139,18 @@ export default function RegisterScreen() {
                 <TextInput
                     value={password}
                     onChangeText={setPassword}
+                    secureTextEntry
+                    style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
+                    textColor={theme.text}
+                    underlineColor="transparent"
+                    activeUnderlineColor="transparent"
+                    placeholder="Ingresa una contraseña segura"
+                    maxLength={32}
+                />
+                <Text variant="titleMedium" style={{ color: theme.text }}>Confirmar contraseña</Text>
+                <TextInput
+                    value={passwordToConfirm}
+                    onChangeText={setPasswordToConfirm}
                     secureTextEntry
                     style={[{ marginBottom: 16, backgroundColor: theme.inputBackground }, styles.input]}
                     textColor={theme.text}

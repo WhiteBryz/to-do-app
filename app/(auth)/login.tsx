@@ -14,12 +14,13 @@ export default function LoginScreen() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+
     const handleLogin = async () => {
         try {
             setError("");
             const userLogin =  await login(email, password);
-            //console.log(userLogin.user.uid)
-            router.replace("/(drawer)/home");
+            console.log(userLogin.user.uid)
+            router.replace({pathname: "/(drawer)/home"});
         } catch (err: any) {
             setError("No se encuentran credenciales, favor de validar los datos.");
             // console.log(err)
