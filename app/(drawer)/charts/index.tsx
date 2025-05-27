@@ -8,13 +8,12 @@ import {
   getProductivityPerDay,
   getWeeklyProgress,
 } from "@/utils/chartHelpers";
-import { format, isThisMonth, isThisWeek, parseISO } from "date-fns";
+import { format, isThisMonth, isThisWeek, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Text, View, useWindowDimensions } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { ScrollView } from "react-native-gesture-handler";
-import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import { useTheme } from "@/context/ThemeContext";
 import ChipFilterAlternative from "@/components/ChipFilter2";
 import { StyleSheet } from "react-native";
@@ -25,172 +24,117 @@ const graphicFilters = [
   { label: "Productividad", value: "productivity" },
   { label: "Mensual", value: "monthly" },
 ];
-// OPciones de filtro para las gráficas
+
+// Función helper para validar y parsear fechas
+const safeParseDateString = (dateString) => {+
+  if (!dateString || typeof dateString !== 'string') {
+    return null;
+  }
+  
+  try {
+    const parsedDate = parseISO(dateString);
+    return isValid(parsedDate) ? parsedDate : null;
+  } catch (error) {
+    return null;
+  }
+};
+
 export default function Charts() {
   const theme = useTheme();
-  const [filter, setFilter] = useState<
-    "weekly" | "productivity" | "monthly" | null
-  >("weekly");
+  const [filter, setFilter] = useState("weekly");
   const { tasks } = useTasks();
-  let progress = 0;
-  let label = "";
-  // Definición de la variable de progreso y su etiqueta
-  if (filter === "weekly") {
-    progress = getWeeklyProgress(tasks);
-    label = "Avance semanal";
-  } else if (filter === "monthly") {
-    progress = getMonthlyProgress(tasks);
-    label = "Avance mensual";
-  } else if (filter === "productivity") {
-    progress = getProductivity(tasks);
-    label = "Productividad";
-  }
-
-  let DiaMasproductivo = getMostProductiveDay(tasks);
-  let formattedProductiveDay = "";
-
-  if (DiaMasproductivo && typeof DiaMasproductivo === "string") {
-    // Convertir string a Date y formatear en español
-    const dateObj = new Date(DiaMasproductivo);
-    if (!isNaN(dateObj.getTime())) {
-      formattedProductiveDay = format(dateObj, "EEEE d 'de' MMMM", {
-        locale: es,
-      });
-    }
-  }
-  // Filtrar tareas pendientes según el filtro seleccionado
-  const pendingTasks =
-    filter === "weekly"
-      ? tasks.filter(
-          (t) =>
-            !t.completed && isThisWeek(parseISO(t.date), { weekStartsOn: 1 })
-        )
-      : filter === "monthly"
-      ? tasks.filter((t) => !t.completed && isThisMonth(parseISO(t.date)))
-      : filter === "productivity"
-      ? []
-      : [];
-  const filteredTasks =
-    filter === "weekly"
-      ? tasks.filter((t) => isThisWeek(parseISO(t.date), { weekStartsOn: 1 }))
-      : filter === "monthly"
-      ? tasks.filter((t) => isThisMonth(parseISO(t.date)))
-      : [];
-
-  const completedTasks = filteredTasks.filter((t) => t.completed).length;
-  const totalTasks = filteredTasks.length;
-  const productivityByDay = getProductivityPerDay(tasks);
-
   const layout = useWindowDimensions();
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: "productivity", title: "Productividad por día" },
-    { key: "pending", title: "Actividades pendientes" },
-  ]);
-  // Escena: Productividad por día
-  const ProductivityRoute = () => (
-    <ScrollView
-      style={{ marginTop: 10 }}
-      contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      nestedScrollEnabled
-    >
-      {formattedProductiveDay && (
-        <Text
-          style={{
-            fontSize: 16,
-            alignSelf: "center",
-            marginBottom: 20,
-            fontWeight: "bold",
-            color: theme.text,
-          }}
-        >
-          Tu día más productivo fue el {formattedProductiveDay}
-        </Text>
-      )}
-      {Object.entries(productivityByDay).map(([day, data]) => (
-        <View key={day} style={{ marginBottom: 20, paddingHorizontal: 16 }}>
-          <Text
-            style={{
-              fontWeight: "bold",
-              marginBottom: 8,
-              textTransform: "capitalize",
-              fontSize: 16,
-              color: theme.text,
-            }}
-          >
-            {day}
-          </Text>
-          <ProgressBarComponent
-            completed={data.completed}
-            total={data.total}
-          />
-        </View>
-      ))}
-    </ScrollView>
-  );
 
-  // Escena: Actividades pendientes
-  const PendingRoute = () => (
-    <ScrollView
-      style={{ marginTop: 10 }}
-      contentContainerStyle={{ paddingBottom: 500 }}
-      showsVerticalScrollIndicator={false}
-      nestedScrollEnabled
-    >
-      {pendingTasks.length === 0 ? (
-        <Text
-          style={{
-            textAlign: "center",
-            fontSize: 16,
-            fontWeight: "bold",
-            color: theme.text,
-          }}
-        >
-          No tienes tareas pendientes
-        </Text>
-      ) : (
-        <>
-          {pendingTasks.map((task) => (
-            <View
-              key={task.id}
-              style={{
-                marginVertical: 5,
-                marginHorizontal: 16,
-                padding: 10,
-                backgroundColor: theme.taskCardBackground,
-                borderRadius: 8,
-              }}
-            >
-              <Text
-                style={{ fontSize: 16, fontWeight: "600", color: theme.text }}
-              >
-                {task.title}
-              </Text>
-              <Text style={{ fontSize: 14, color: theme.dateText }}>
-                {task.date.split("T")[0]} - {task.time}
-              </Text>
-            </View>
-          ))}
-        </>
-      )}
-    </ScrollView>
-  );
+  // Validar que tasks existe y es un array
+  const safeTasks = useMemo(() => {
+    return Array.isArray(tasks) ? tasks : [];
+  }, [tasks]);
 
-  const renderScene = SceneMap({
-    productivity: ProductivityRoute,
-    pending: PendingRoute,
-  });
+  // Calcular progreso
+  const { progress, label } = useMemo(() => {
+    let calculatedProgress = 0;
+    let calculatedLabel = "";
+
+    if (filter === "weekly") {
+      calculatedProgress = getWeeklyProgress(safeTasks);
+      calculatedLabel = "Avance semanal";
+    } else if (filter === "monthly") {
+      calculatedProgress = getMonthlyProgress(safeTasks);
+      calculatedLabel = "Avance mensual";
+    } else if (filter === "productivity") {
+      calculatedProgress = getProductivity(safeTasks);
+      calculatedLabel = "Productividad";
+    }
+
+    return { progress: calculatedProgress, label: calculatedLabel };
+  }, [filter, safeTasks]);
+
+  // Obtener día más productivo (solo para productividad)
+  const formattedProductiveDay = useMemo(() => {
+    if (filter !== "productivity") return "";
+    
+    const mostProductiveDay = getMostProductiveDay(safeTasks);
+    
+    if (!mostProductiveDay) {
+      return "";
+    }
+
+    try {
+      const dateObj = new Date(mostProductiveDay);
+      if (isNaN(dateObj.getTime())) {
+        return "";
+      }
+      return format(dateObj, "EEEE d 'de' MMMM", { locale: es });
+    } catch (error) {
+      return "";
+    }
+  }, [safeTasks, filter]);
+
+  // Filtrar tareas pendientes (solo para semanal y mensual)
+  const pendingTasks = useMemo(() => {
+    if (filter === "productivity") {
+      return [];
+    }
+
+    return safeTasks.filter((task) => {
+      if (!task || !task.date || task.completed) {
+        return false;
+      }
+
+      const taskDate = safeParseDateString(task.date);
+      if (!taskDate) {
+        return false;
+      }
+
+      try {
+        if (filter === "weekly") {
+          return isThisWeek(taskDate, { weekStartsOn: 1 });
+        } else if (filter === "monthly") {
+          return isThisMonth(taskDate);
+        }
+        return false;
+      } catch (error) {
+        return false;
+      }
+    });
+  }, [safeTasks, filter]);
+
+  // Obtener productividad por día (solo para productividad)
+  const productivityByDay = useMemo(() => {
+    if (filter !== "productivity") return {};
+    return getProductivityPerDay(safeTasks);
+  }, [safeTasks, filter]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Chips de filtro */}
       <View style={[styles.chipContainer, { marginBottom: 8 }]}>
         {graphicFilters.map((f) => (
           <ChipFilterAlternative
             key={f.value}
             label={f.label}
             selected={filter === f.value}
-            onSelect={() => setFilter(f.value as "weekly" | "monthly" | "productivity")}
+            onSelect={() => setFilter(f.value)}
             selectedBackground={theme.chipSelected}
             selectedTextColor={theme.chipText}
             unselectedBackground={theme.chipUnselectedBackground}
@@ -199,6 +143,7 @@ export default function Charts() {
         ))}
       </View>
 
+      {/* Círculo de progreso */}
       <View style={[styles.progressContainer, { marginTop: 0 }]}>
         <Text style={[styles.labelText, { color: theme.text }]}>{label}</Text>
         <AnimatedCircularProgress
@@ -211,32 +156,148 @@ export default function Charts() {
           rotation={180}
         >
           {(fill: number) => (
-            <Text style={[styles.percentageText, { color: theme.progressText }]}>
-              {Math.round(fill)}%
+            <Text
+              style={[styles.percentageText, { color: theme.progressText }]}
+            >
+              {Math.round(fill || 0)}%
             </Text>
           )}
         </AnimatedCircularProgress>
       </View>
 
-      {filter === "productivity" && (
-        <View style={{ flex: 1, marginTop: 20 }}>
-          <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            initialLayout={{ width: layout.width }}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                indicatorStyle={{ backgroundColor: theme.primary }}
-                style={{ backgroundColor: theme.background }}
-                activeColor={theme.primary}
-                inactiveColor={theme.secondaryText}
-              />
+      {/* Contenido específico según el filtro */}
+      <ScrollView
+        style={{ flex: 1, marginTop: 20 }}
+        contentContainerStyle={{
+          paddingBottom: 100,
+          flexGrow: 1,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* PANTALLA PRODUCTIVIDAD: Solo tareas por día */}
+        {filter === "productivity" && (
+          <>
+            {formattedProductiveDay && (
+              <Text
+                style={{
+                  fontSize: 16,
+                  alignSelf: "center",
+                  marginBottom: 20,
+                  fontWeight: "bold",
+                  color: theme.text,
+                }}
+              >
+                Tu día más productivo fue el {formattedProductiveDay}
+              </Text>
             )}
-          />
-        </View>
-      )}
+            
+            {Object.entries(productivityByDay).map(([day, data]) => {
+              // Type assertion for data
+              const { completed, total } = data as { completed: number; total: number };
+              return (
+                <View key={day} style={{ marginBottom: 20, paddingHorizontal: 16 }}>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: 8,
+                      textTransform: "capitalize",
+                      fontSize: 16,
+                      color: theme.text,
+                    }}
+                  >
+                    {day}
+                  </Text>
+                  <ProgressBarComponent 
+                    completed={completed} 
+                    total={total} 
+                  />
+                </View>
+              );
+            })}
+            
+            {Object.keys(productivityByDay).length === 0 && (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: 16,
+                  color: theme.text,
+                  marginTop: 50,
+                }}
+              >
+                No hay datos de productividad disponibles
+              </Text>
+            )}
+          </>
+        )}
+
+        {/* PANTALLAS SEMANAL/MENSUAL: Solo tareas pendientes */}
+        {(filter === "weekly" || filter === "monthly") && (
+          <>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: theme.text,
+                marginBottom: 16,
+                paddingHorizontal: 16,
+              }}
+            >
+              Tareas Pendientes
+            </Text>
+            
+            {pendingTasks.length === 0 ? (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: theme.text,
+                  marginTop: 50,
+                }}
+              >
+                No tienes tareas pendientes
+              </Text>
+            ) : (
+              <>
+                {pendingTasks.map((task) => {
+                  if (!task || !task.id || !task.title) {
+                    return null;
+                  }
+
+                  return (
+                    <View
+                      key={task.id}
+                      style={{
+                        marginVertical: 5,
+                        marginHorizontal: 16,
+                        padding: 12,
+                        backgroundColor: theme.taskCardBackground,
+                        borderRadius: 8,
+                        borderLeftWidth: 4,
+                        borderLeftColor: theme.primary,
+                      }}
+                    >
+                      <Text
+                        style={{ 
+                          fontSize: 16, 
+                          fontWeight: "600", 
+                          color: theme.text,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {task.title}
+                      </Text>
+                      <Text style={{ fontSize: 14, color: theme.dateText }}>
+                        {task.date ? task.date.split("T")[0] : "Sin fecha"} - {task.time || "Sin hora"}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </>
+            )}
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -247,24 +308,24 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   chipContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
     marginVertical: 16,
-    gap: 8, // Espacio entre chips
+    gap: 8,
   },
   progressContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 30,
   },
   labelText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 20,
   },
   percentageText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
 });
