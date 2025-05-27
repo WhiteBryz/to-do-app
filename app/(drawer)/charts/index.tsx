@@ -1,5 +1,6 @@
-import ChipFilter from "@/components/ChipFilter";
+import ChipFilterAlternative from "@/components/ChipFilter2";
 import ProgressBarComponent from "@/components/ProgressBar";
+import { useTheme } from "@/context/ThemeContext";
 import { useTasks } from "@/hooks/UseTasks";
 import {
   getMonthlyProgress,
@@ -8,15 +9,12 @@ import {
   getProductivityPerDay,
   getWeeklyProgress,
 } from "@/utils/chartHelpers";
-import { format, isThisMonth, isThisWeek, parseISO, isValid } from "date-fns";
+import { format, isThisMonth, isThisWeek, isValid, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import React, { useState, useMemo } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import React, { useMemo, useState } from "react";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { ScrollView } from "react-native-gesture-handler";
-import { useTheme } from "@/context/ThemeContext";
-import ChipFilterAlternative from "@/components/ChipFilter2";
-import { StyleSheet } from "react-native";
 
 // Opciones de filtro para las gráficas
 const graphicFilters = [
@@ -26,7 +24,7 @@ const graphicFilters = [
 ];
 
 // Función helper para validar y parsear fechas
-const safeParseDateString = (dateString) => {+
+const safeParseDateString = (dateString:string) => {
   if (!dateString || typeof dateString !== 'string') {
     return null;
   }
