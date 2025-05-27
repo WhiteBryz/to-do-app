@@ -18,10 +18,11 @@ export default function LoginScreen() {
         try {
             setError("");
             const userLogin =  await login(email, password);
-            console.log(userLogin)
+            //console.log(userLogin.user.uid)
             router.replace("/(drawer)/home");
         } catch (err: any) {
-            setError((err.message) || "Ocurrió un error");
+            setError("No se encuentran credenciales, favor de validar los datos.");
+            // console.log(err)
         }
     };
     return (
@@ -40,6 +41,8 @@ export default function LoginScreen() {
                     textColor={theme.text}
                     underlineColor="transparent"
                     activeUnderlineColor="transparent"
+                    placeholder="Ingresa tu correo para iniciar sesión"
+                    autoFocus={true}
                 />
                 <Text variant="titleMedium" style={{ color: theme.text }}>Contraseña</Text>
                 <TextInput
@@ -50,14 +53,15 @@ export default function LoginScreen() {
                     textColor={theme.text}
                     underlineColor="transparent"
                     activeUnderlineColor="transparent"
+                    placeholder="Ingresa tu contraseña"
                 />
                 <Text
-                    style={{ marginBottom: 16, textAlign: "center", color: theme.text }}
+                    style={{ marginBottom: 10, textAlign: "center", color: theme.text }}
                     onPress={() => router.replace("./register")}
                 >
                     ¿No tienes cuenta? <Text style={{ color: theme.primary, textDecorationLine:'underline' }}>Regístrate</Text>
                 </Text>
-                {error ? <HelperText type="error" visible={true}>{error}</HelperText> : null}
+                {error ? <HelperText type="error" style={{ color: "darkred", width: "100%", textAlign: "center", marginBottom: 10 }} visible={true}>{error}</HelperText> : null}
 
 
                 <Button mode="contained" onPress={handleLogin} textColor={theme.background} style={{ backgroundColor: theme.buttonBackground }}>
