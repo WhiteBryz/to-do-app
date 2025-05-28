@@ -1,16 +1,29 @@
-import clickSound from '@/assets/sounds/click.mp3';
-import tickSound from '@/assets/sounds/tick.mp3';
-import CustomToast from '@/components/CustomToast';
-import { useSettings } from '@/context/SettingsContext';
-import { useTheme } from '@/context/ThemeContext';
-import { useCustomToast } from '@/hooks/useCustomToast';
-import { useSound } from '@/hooks/useSound';
-import { evaluateTrophies, getUserStats, resetUserStats, updateUserStats } from '@/store/trophiesStore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-
+import clickSound from "@/assets/sounds/click.mp3";
+import tickSound from "@/assets/sounds/tick.mp3";
+import CustomToast from "@/components/CustomToast";
+import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
+import { useCustomToast } from "@/hooks/useCustomToast";
+import { useSound } from "@/hooks/useSound";
+import {
+  evaluateTrophies,
+  getUserStats,
+  resetUserStats,
+  updateUserStats,
+} from "@/store/trophiesStore";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 
 export default function Settings() {
   const router = useRouter();
@@ -22,7 +35,10 @@ export default function Settings() {
     resetSettings,
     username,
     profileColor,
+    //userRole,
   } = useSettings();
+
+  const isMaster = true; //userRole === 'master';
 
   const { playSound } = useSound();
   const theme = useTheme();
@@ -30,18 +46,21 @@ export default function Settings() {
 
   const confirmReset = () => {
     Alert.alert(
-      '¿Eliminar todo?',
-      'Esto borrará tareas, logros y configuraciones. ¿Estás seguro?',
+      "¿Eliminar todo?",
+      "Esto borrará tareas, logros y configuraciones. ¿Estás seguro?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Eliminar todo',
-          style: 'destructive',
+          text: "Eliminar todo",
+          style: "destructive",
           onPress: async () => {
             await AsyncStorage.clear();
             await resetUserStats();
             await resetSettings();
-            toast.showToast('🗑 Todo borrado', 'Se reinició el almacenamiento local');
+            toast.showToast(
+              "🗑 Todo borrado",
+              "Se reinició el almacenamiento local"
+            );
           },
         },
       ]
@@ -76,13 +95,28 @@ export default function Settings() {
         style={[styles.settingRow, styles.profileRow]}
         onPress={async () => {
           await playSound(clickSound);
-          router.push('../../modals/profile');
+          router.push("../../modals/profile");
         }}
       >
+        {/* COMPONENTE CONDICIONAL - Solo visible para Master */}
+        {isMaster && (
+          <Pressable
+            style={[styles.settingRow, styles.profileRow]}
+            onPress={async () => {
+              await playSound(clickSound);
+              router.push("../../modals/userManager");
+            }}
+          >
+            <Text style={[styles.label, { color: theme.text }]}>
+              Gestionar permisos
+            </Text>
+            <Ionicons name="people-outline" size={24} color={theme.text} />
+          </Pressable>
+        )}
         <Text style={[styles.label, { color: theme.text }]}>Editar perfil</Text>
         <View style={[styles.avatarMini, { backgroundColor: profileColor }]}>
           <Text style={styles.avatarTextMini}>
-            {(username?.charAt(0) || '?').toUpperCase()}
+            {(username?.charAt(0) || "?").toUpperCase()}
           </Text>
         </View>
       </Pressable>
@@ -91,9 +125,12 @@ export default function Settings() {
         label="Modo oscuro"
         value={darkMode}
         onValueChange={(val) => {
-          setSetting('darkMode', val);
+          setSetting("darkMode", val);
           playSound(tickSound);
-          toast.showToast('🌙 Modo oscuro activado', 'Ahora todo se ve más cool');
+          toast.showToast(
+            "🌙 Modo oscuro activado",
+            "Ahora todo se ve más cool"
+          );
         }}
         theme={theme}
       />
@@ -102,11 +139,13 @@ export default function Settings() {
         label="Silenciar notificaciones"
         value={muteNotifications}
         onValueChange={(val) => {
-          setSetting('muteNotifications', val);
-          const title = val ? '🔕 Notificaciones silenciadas' : '🔔 Notificaciones activadas';
+          setSetting("muteNotifications", val);
+          const title = val
+            ? "🔕 Notificaciones silenciadas"
+            : "🔔 Notificaciones activadas";
           const message = val
-            ? 'Shhh... tus notificaciones están tomando una siesta.'
-            : '¡Tus notificaciones están despiertas y listas para molestar!';
+            ? "Shhh... tus notificaciones están tomando una siesta."
+            : "¡Tus notificaciones están despiertas y listas para molestar!";
           playSound(tickSound);
           toast.showToast(title, message);
         }}
@@ -117,29 +156,30 @@ export default function Settings() {
         label="Silenciar sonidos"
         value={muteSounds}
         onValueChange={(val) => {
-          setSetting('muteSounds', val);
+          setSetting("muteSounds", val);
           playSound(tickSound);
           toast.showToast(
-            val ? '🔇 Sonidos silenciados' : '🔊 Sonidos activados',
+            val ? "🔇 Sonidos silenciados" : "🔊 Sonidos activados",
             val
-              ? 'Nada interrumpirá tu zen.'
-              : '¡Prepárate para la fiesta de sonidos!'
+              ? "Nada interrumpirá tu zen."
+              : "¡Prepárate para la fiesta de sonidos!"
           );
         }}
         theme={theme}
       />
-
       <Pressable
         onPress={confirmReset}
         style={{
           marginTop: 30,
           padding: 12,
-          backgroundColor: '#ff4d4d',
+          backgroundColor: "#ff4d4d",
           borderRadius: 8,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>Eliminar todo</Text>
+        <Text style={{ color: "white", fontWeight: "bold" }}>
+          Eliminar todo
+        </Text>
       </Pressable>
 
       <CustomToast
@@ -177,13 +217,13 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginVertical: 12,
   },
   label: {
@@ -199,13 +239,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginLeft: 12,
   },
   avatarTextMini: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 16,
+  },
+  masterBadge: {
+    backgroundColor: "#F44336",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 12,
+  },
+  masterBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 });

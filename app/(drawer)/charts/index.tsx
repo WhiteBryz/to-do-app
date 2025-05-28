@@ -24,7 +24,7 @@ const graphicFilters = [
 ];
 
 // Función helper para validar y parsear fechas
-const safeParseDateString = (dateString:string) => {
+const safeParseDateString = (dateString: string) => {
   if (!dateString || typeof dateString !== 'string') {
     return null;
   }

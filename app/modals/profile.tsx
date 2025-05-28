@@ -1,9 +1,9 @@
-import clickSound from '@/assets/sounds/click.mp3';
-import { useSettings } from '@/context/SettingsContext';
-import { useTheme } from '@/context/ThemeContext';
-import { useSound } from '@/hooks/useSound';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import clickSound from "@/assets/sounds/click.mp3";
+import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
+import { useSound } from "@/hooks/useSound";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Pressable,
   SafeAreaView,
@@ -11,18 +11,17 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import WheelColorPicker from 'react-native-wheel-color-picker';
+} from "react-native";
+import WheelColorPicker from "react-native-wheel-color-picker";
 
 export default function ProfileModal() {
-  const {
-    username,
-    profileColor,
-    setSetting,
-  } = useSettings();
-
+  const { username, profileColor, setSetting } = useSettings();
   const [tempUsername, setTempUsername] = useState(username);
   const [hexInput, setHexInput] = useState(profileColor);
+
+  // Valores de Firebase simulados 
+  const [firebaseEmail, setFirebaseEmail] = useState("usuario@ejemplo.com");
+  const [firebaseRole, setFirebaseRole] = useState("admin");
 
   const theme = useTheme();
   const router = useRouter();
@@ -35,48 +34,56 @@ export default function ProfileModal() {
 
   const handleCancel = async () => {
     await playSound(clickSound);
-    router.replace('/(drawer)/settings');
+    router.replace("/(drawer)/settings");
   };
 
-const handleConfirm = async () => {
-  await playSound(clickSound);
-
-  const trimmedName = tempUsername.trim();
-  if (trimmedName.length > 0) {
-    setSetting('username', trimmedName);
-  }
-
-  if (/^#([0-9A-Fa-f]{6})$/.test(hexInput)) {
-    setSetting('profileColor', hexInput);
-  }
-
-  setTimeout(() => {
-    router.replace('/(drawer)/settings');
-  }, 100); // da tiempo a que se actualicen los valores
-};
-
-
+  const handleConfirm = async () => {
+    await playSound(clickSound);
+    // Aquí iría la lógica del guardado
+    router.replace("/(drawer)/settings");
+  };
 
   return (
-    <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.modalContainer, { backgroundColor: theme.background }]}
+    >
       <Text style={[styles.header, { color: theme.text }]}>Editar perfil</Text>
 
       <View style={[styles.avatar, { backgroundColor: hexInput }]}>
         <Text style={styles.avatarText}>
-          {(tempUsername?.charAt(0) || '?').toUpperCase()}
+          {(tempUsername?.charAt(0) || "?").toUpperCase()}
         </Text>
       </View>
 
       <Text style={[styles.label, { color: theme.text }]}>Nombre de usuario</Text>
       <TextInput
-        style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
+        style={[
+          styles.input,
+          { color: theme.text, borderColor: theme.primary },
+        ]}
         placeholder="Tu nombre"
         placeholderTextColor="#888"
         value={tempUsername}
         onChangeText={setTempUsername}
       />
 
-      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>Color de perfil (HEX)</Text>
+      <Text style={[styles.label, { color: theme.text }]}>Correo</Text>
+      <TextInput
+        style={[styles.input, { color: theme.text }]}
+        value={firebaseEmail} //Valor del correo
+        editable={false}
+      />
+
+      <Text style={[styles.label, { color: theme.text }]}>Rol</Text>
+      <TextInput
+        style={[styles.input, { color: theme.text }]}
+        value={firebaseRole} // Valor del  rol
+        editable={false}
+      />
+
+      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
+        Color de perfil (HEX)
+      </Text>
       <TextInput
         style={[
           styles.input,
@@ -84,7 +91,7 @@ const handleConfirm = async () => {
             color: theme.text,
             borderColor: /^#([0-9A-Fa-f]{6})$/.test(hexInput)
               ? theme.primary
-              : '#f44336',
+              : "#f44336",
           },
         ]}
         placeholder="#ff00ff"
@@ -93,7 +100,9 @@ const handleConfirm = async () => {
         onChangeText={setHexInput}
       />
 
-      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>Selector de color</Text>
+      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
+        Selector de color
+      </Text>
       <View style={styles.pickerContainer}>
         <WheelColorPicker
           color={hexInput}
@@ -101,12 +110,17 @@ const handleConfirm = async () => {
         />
       </View>
 
-      {/* Botones de acción */}
       <View style={styles.buttonContainer}>
-        <Pressable style={[styles.button, { backgroundColor: '#999' }]} onPress={handleCancel}>
+        <Pressable
+          style={[styles.button, { backgroundColor: "#999" }]}
+          onPress={handleCancel}
+        >
           <Text style={styles.buttonText}>Cancelar</Text>
         </Pressable>
-        <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleConfirm}>
+        <Pressable
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={handleConfirm}
+        >
           <Text style={styles.buttonText}>Confirmar</Text>
         </Pressable>
       </View>
@@ -121,18 +135,26 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   label: {
     fontSize: 16,
+    marginTop: 8,
   },
   input: {
     borderBottomWidth: 1,
     fontSize: 16,
     paddingVertical: 6,
     marginBottom: 12,
+  },
+  inputDisabled: {
+    borderBottomWidth: 1,
+    fontSize: 16,
+    paddingVertical: 6,
+    marginBottom: 12,
+    backgroundColor: "#e0e0e0",
   },
   pickerContainer: {
     height: 220,
@@ -144,28 +166,28 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
   },
   avatarText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 24,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 12,
   },
   button: {
     flex: 1,
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
