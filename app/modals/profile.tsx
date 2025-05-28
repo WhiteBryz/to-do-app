@@ -2,8 +2,6 @@ import clickSound from "@/assets/sounds/click.mp3";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useSound } from "@/hooks/useSound";
-import { GlobalUser, UserRole } from "@/types/user";
-import { updateUserNameAndNewRole } from "@/utils/syncFirestore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -21,18 +19,17 @@ export default function ProfileModal() {
   const { username, profileColor, setSetting } = useSettings();
   const [tempUsername, setTempUsername] = useState(username);
   const [hexInput, setHexInput] = useState(profileColor);
-  const { user } = useLocalSearchParams();
-  const parsedUser: GlobalUser | null = user ? JSON.parse(user as string) : null;
+  const { 
+    id,
+    name,
+    email,
+    userRole } = useLocalSearchParams();
+  //const parsedUser: GlobalUser | null = user ? JSON.parse(user as string) : null;
+  console.log(id)
 
   // Valores de Firebase simulados 
   const [firebaseEmail, setFirebaseEmail] = useState("usuario@ejemplo.com");
   const [firebaseRole, setFirebaseRole] = useState("admin");
-
-  const UserRoles: Record<UserRole, string> = {
-    master: "Maestro",
-    admin: "Administrador",
-    worker: "Trabajador"
-  }
 
 
   const theme = useTheme();
@@ -42,8 +39,8 @@ export default function ProfileModal() {
   useEffect(() => {
     setHexInput(profileColor);
     setTempUsername(username);
-    setFirebaseEmail(parsedUser ? parsedUser.email : "Sin email");
-    setFirebaseRole(parsedUser ? UserRoles[parsedUser.userRole] : "Sin rol")
+    setFirebaseEmail(email.toString());
+    setFirebaseRole(userRole.toString())
   }, [profileColor, username]);
 
   const handleCancel = async () => {
@@ -53,7 +50,7 @@ export default function ProfileModal() {
 
   const handleConfirm = async () => {
     await playSound(clickSound);
-    if(parsedUser) await updateUserNameAndNewRole(parsedUser?.id, tempUsername)
+    //if (id) await updateUserNameAndNewRole(id.toString(), tempUsername)
     router.replace("/(drawer)/settings");
   };
 
@@ -74,17 +71,17 @@ export default function ProfileModal() {
         <TextInput
           style={[
             styles.input,
-            { color: theme.text, borderColor: theme.primary },
+            { color: "gray", borderColor: theme.primary },
           ]}
           placeholder="Tu nombre"
           placeholderTextColor="#888"
-          value={parsedUser ? parsedUser.name : "Sin email"}
-          onChangeText={setTempUsername}
+          value={name.toString()}
+          editable={false}
         />
 
         <Text style={[styles.label, { color: theme.text }]}>Correo</Text>
         <TextInput
-          style={[styles.input, { color: "gray"}]}
+          style={[styles.input, { color: "gray" }]}
           value={firebaseEmail} //Valor del correo
           editable={false}
         />

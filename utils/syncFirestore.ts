@@ -48,9 +48,10 @@ export const getUserData = async () => {
 }
 
 // Tipado opcional para usuarios resumidos
-interface UserSummary {
+export interface UserSummary {
   uid: string;
   name: string;
+  userRole: string;
 }
 
 // Traer datos de todos los usuarios a exepción del logueado
@@ -68,7 +69,8 @@ export const fetchOtherUsers = async (localUser: GlobalUser | null, isAdminOrMas
         const data = doc.data();
         return {
           uid: data.id,
-          name: data.name
+          name: data.name,
+          userRole: data.userRole
         };
       });
   } catch (error) {

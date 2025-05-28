@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 interface User {
   id: string;
@@ -15,14 +15,22 @@ export default function RolesModal() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Record<string, 'admin' | 'worker'>>({});
 
+  const {
+      id,
+      name,
+      email,
+      userRole } = useLocalSearchParams();
+
   useEffect(() => {
     // Datos simulados para pruebas
     const dummyUsers: User[] = [
-      { id: '1', name: 'Juan Pérez', role: 'worker' }, 
+      { id: '1', name: 'Juan Pérez', role: 'worker' },
       { id: '2', name: 'Luisa Gómez', role: 'admin' },
       { id: '3', name: 'Carlos Ruiz', role: 'worker' },
       { id: '4', name: 'Ana Torres', role: 'admin' },
     ];
+
+    
 
     setUsers(dummyUsers);
     const initialRoles: Record<string, 'admin' | 'worker'> = {};

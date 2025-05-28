@@ -114,7 +114,10 @@ export default function Settings() {
           await playSound(clickSound);
           router.push({
             pathname: "/modals/profile", params: {
-              user: JSON.stringify(localUser)
+              id: localUser?.id,
+              name: localUser?.name,
+              email: localUser?.email,
+              userRole: localUser?.userRole
             }
           });
         }}
@@ -134,7 +137,10 @@ export default function Settings() {
             await playSound(clickSound);
             router.push({
               pathname: "/modals/userManager", params: {
-                user: JSON.stringify(localUser)
+                id: localUser.id,
+                name: localUser.name,
+                email: localUser.email,
+                userRole: localUser.userRole
               }
             });
           }}

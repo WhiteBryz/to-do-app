@@ -54,6 +54,7 @@ export default function NewTaskModal() {
   interface UserSummary {
     uid: string;
     name: string;
+    userRole: string;
   }
 
   useEffect(() => {
