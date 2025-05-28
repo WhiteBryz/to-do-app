@@ -5,7 +5,7 @@ import TextDivider from "@/components/TextDivider";
 import { useTheme } from "@/context/ThemeContext";
 import { useTasks } from '@/hooks/UseTasks';
 import { getUserId } from "@/services/authService";
-import { addTask, updateTask } from "@/store/taskStore";
+import { addTask, syncTasksFromFirebase, updateTask } from "@/store/taskStore";
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
 import { getTaskCategories } from '@/utils/dateFilters';
@@ -24,14 +24,6 @@ export default function HomeScreen() {
     // Recibir uid del usuario
     //rconst params = useLocalSearchParams()
     //const {userUid} = params;
-
-    try {
-        const userUid = getUserId();
-        console.log(`Param userUid: ${userUid}`);
-    } catch (e) {
-        console.error(`Error: ${e}`);
-    }
-
     //
     const { tasks, reload, setTasks } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
@@ -46,6 +38,9 @@ export default function HomeScreen() {
     const filteredTasksIncompleted = filteredTasks.filter(task => task.completed === false)
     const hasTasksCompleted = filteredTasksCompleted.length > 0;
     const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
+    const [userUid, setUserUid] = useState<string | null>("")
+    
+    // Traer uid del usuario
 
     useEffect(() => {
         const auth = getAuth(firebaseApp); // ✅ Pasando la app correctamente
@@ -57,6 +52,15 @@ export default function HomeScreen() {
 
         return unsubscribe;
     }, []);
+
+    useEffect(()=>{
+        try{
+            setUserUid(getUserId());
+            syncTasksFromFirebase(userUid)
+        } catch(e){
+            console.log("Error")
+        }
+    })
 
     useFocusEffect(
         useCallback(() => {

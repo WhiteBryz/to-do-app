@@ -27,7 +27,8 @@ export const getUserId = (): string | null => {
   const user = getAuth().currentUser;
   
   if(!user){
-    throw new Error('Usuario no loggeado');
+    console.log('Usuario no loggeado (getUserId func)');
+    return null;
   }
   return user.uid;
 }

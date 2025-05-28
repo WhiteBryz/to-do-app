@@ -19,7 +19,7 @@ export default function LoginScreen() {
         try {
             setError("");
             const userLogin =  await login(email, password);
-            console.log(userLogin.user.uid)
+            //console.log(userLogin.user.uid)
             router.replace({pathname: "/(drawer)/home"});
         } catch (err: any) {
             setError("No se encuentran credenciales, favor de validar los datos.");
