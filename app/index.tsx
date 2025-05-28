@@ -60,6 +60,6 @@ export default function Index() {
   )}, []);
 
   return (
-    <Redirect href={"./home"} />
+    <Redirect href={"/(drawer)/home"} />
   );
 }

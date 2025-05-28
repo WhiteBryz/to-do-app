@@ -16,20 +16,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewTaskModal() {
   const router = useRouter();
+  // Estados de la tarea
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [date, setDate] = useState<Date>(() => new Date());
   const [time, setTime] = useState<Date>(() => new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminder, setReminder] = useState<ReminderOption>('none');
   const [repeat, setRepeat] = useState<boolean>(false);
+  const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
+  const [createdBy, setCreateBy] = useState<string>('')
+  const [assignedTo, setAssignedTo] = useState<string>('')
+  
+  // Estados de los componentes
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
-  const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
-  const [task, setTask] = useState<Task | null>(null);
+  //const [task, setTask] = useState<Task | null>(null);
   const [showPriorityModal, setShowPriorityModal] = useState(false);
   const [tempPriority, setTempPriority] = useState<PriorityLevel>(priority);
   const [tempReminder, setTempReminder] = useState(reminder);
@@ -112,6 +117,8 @@ export default function NewTaskModal() {
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      createdBy,
+      assignedTo
     };
 
     const reminderOptions = {

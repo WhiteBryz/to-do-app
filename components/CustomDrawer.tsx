@@ -2,9 +2,11 @@ import clickSound from '@/assets/sounds/click.mp3';
 import { useSettings } from '@/context/SettingsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useSound } from '@/hooks/useSound';
+import { logout } from '@/services/authService';
+import { Ionicons } from '@expo/vector-icons';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 export function CustomDrawer(props: any) {
   const { username, profileColor } = useSettings();
@@ -49,6 +51,22 @@ export function CustomDrawer(props: any) {
           />
         );
       })}
+      
+      <DrawerItem 
+        label="Cerrar sesión"
+        icon={({color, size, focused}) => {
+          return <Ionicons name="exit-outline" color={focused ? theme.primary : theme.text} size={size} />
+        }}
+        labelStyle={{ color: theme.text }}
+        style={{ marginLeft: 10, height:"75%", justifyContent:'flex-end', borderRadius:8 }}
+        onPress={ () => {
+          Alert.alert("Cerrar sesión", "¿Estás seguro que deseas cerrar sesión?",[
+            {text:"Cancelar", style: "cancel"},
+            {text: "Aceptar", style: "default", onPress:()=>{
+              logout();
+            }}
+          ])
+        }} />
     </DrawerContentScrollView>
   );
 }

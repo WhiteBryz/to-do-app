@@ -4,6 +4,7 @@ import TaskComponent from "@/components/Task";
 import TextDivider from "@/components/TextDivider";
 import { useTheme } from "@/context/ThemeContext";
 import { useTasks } from '@/hooks/UseTasks';
+import { getUserId } from "@/services/authService";
 import { addTask, updateTask } from "@/store/taskStore";
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
@@ -20,6 +21,18 @@ import { firebaseApp } from '../../../utils/firebaseConfig'; // Asegúrate de qu
 
 
 export default function HomeScreen() {
+    // Recibir uid del usuario
+    //rconst params = useLocalSearchParams()
+    //const {userUid} = params;
+
+    try {
+        const userUid = getUserId();
+        console.log(`Param userUid: ${userUid}`);
+    } catch (e) {
+        console.error(`Error: ${e}`);
+    }
+
+    //
     const { tasks, reload, setTasks } = useTasks();
     const [filter, setFilter] = useState<FilterOption>('today');
     const completedTasks = tasks.filter(t => t.completed).length;
@@ -35,15 +48,16 @@ export default function HomeScreen() {
     const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
 
     useEffect(() => {
-    const auth = getAuth(firebaseApp); // ✅ Pasando la app correctamente
-    const unsubscribe = onAuthStateChanged(auth, user => {
-        if (!user) {
-            router.replace("/login");
-        }
-    });
+        const auth = getAuth(firebaseApp); // ✅ Pasando la app correctamente
+        const unsubscribe = onAuthStateChanged(auth, user => {
+            if (!user) {
+                router.replace("/(auth)/login");
+            }
+        });
 
-    return unsubscribe;
-}, []);
+        return unsubscribe;
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
             const checkFirstTime = async () => {
@@ -59,7 +73,7 @@ export default function HomeScreen() {
 
             checkFirstTime();
         }, [])
-      );
+    );
 
     const toggleCompleted = async (id: string) => {
         try {
@@ -70,7 +84,7 @@ export default function HomeScreen() {
 
             const task = updatedTasks.find(task => task.id === id);
             if (!task) return;
-            
+
             const isNowCompleted = task.completed;
 
             if (isNowCompleted && task.repeat && task.repeatInterval) {
@@ -124,7 +138,7 @@ export default function HomeScreen() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background}}>
+        <View style={{ flex: 1, padding: 16, backgroundColor: theme.background }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.text }}>
                 {filter ? customHeaders[filter] : ''}
             </Text>
