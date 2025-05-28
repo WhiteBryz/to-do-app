@@ -53,19 +53,10 @@ export default function HomeScreen() {
 
         return unsubscribe;
     }, []);
-    
-    useEffect(() => {
-        try {
-            setUserUid(getUserId());
-            syncTasksFromFirebase(userUid)
-            reload()
-        } catch (e) {
-            console.log("Error")
-        }
-    })
 
     useFocusEffect(
         useCallback(() => {
+            // Verificar entrada para trofeos
             const checkFirstTime = async () => {
                 const stats = await getUserStats();
 
@@ -76,6 +67,19 @@ export default function HomeScreen() {
 
                 await reload(); // Carga las tareas
             };
+
+            // Recargar tareas del firebase
+            const syncAndReload = async () => {
+                const uid = getUserId();
+                setUserUid(uid);
+
+                if (uid) {
+                    await syncTasksFromFirebase(uid);
+                    await reload();
+                }
+            };
+
+            syncAndReload();
 
             checkFirstTime();
         }, [])
@@ -92,13 +96,13 @@ export default function HomeScreen() {
             if (!task) return;
 
             const isNowCompleted = task.completed;
-            
+
             // Código para generar una nueva tarea cuando se vaya a repetir. Se crea en automático cuando se marca como completado la tarea
-            if(await createNewAutomaticTask({task,isNowCompleted})){
+            if (await createNewAutomaticTask({ task, isNowCompleted })) {
                 task.repeat = false;
                 task.repeatInterval = 'none';
             }
-            
+
             await updateTask(task);
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });

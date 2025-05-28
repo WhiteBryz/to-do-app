@@ -6,13 +6,15 @@ import { collection, deleteDoc, doc, getDocs, onSnapshot, query, setDoc, where }
 
 
 const STORAGE_KEY = 'tasks';
+const tasksDirective = 'tasks/'
+const usersDirective = 'users/'
 
 const getUserId = () => auth.currentUser?.uid;
 
 export const syncTasksFromFirebase = async (userUid:string | null): Promise<Task[]> => {
 
   try{
-    const taskRef = collection(fireStore,'tasks');
+    const taskRef = collection(fireStore,'tasks/'); // aquí estaba sin /
     const q = query(taskRef, where('createdBy','==',userUid) || where('assignedTo','==',userUid))
     
     const snapshot = await getDocs(q);
@@ -91,7 +93,7 @@ export const deleteTask = async (id: string) => {
 
   const uid = getUserId();
   if (uid) {
-    const docuRef = doc(fireStore, `task/${id}`)
+    const docuRef = doc(fireStore, `tasks/${id}`)
     deleteDoc(docuRef);
   }
 };
