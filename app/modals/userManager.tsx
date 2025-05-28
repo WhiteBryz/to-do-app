@@ -18,7 +18,7 @@ export default function RolesModal() {
   useEffect(() => {
     // Datos simulados para pruebas
     const dummyUsers: User[] = [
-      { id: '1', name: 'Juan Pérez', role: 'worker' },
+      { id: '1', name: 'Juan Pérez', role: 'worker' }, 
       { id: '2', name: 'Luisa Gómez', role: 'admin' },
       { id: '3', name: 'Carlos Ruiz', role: 'worker' },
       { id: '4', name: 'Ana Torres', role: 'admin' },
