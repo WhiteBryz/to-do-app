@@ -2,11 +2,14 @@ import clickSound from "@/assets/sounds/click.mp3";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useSound } from "@/hooks/useSound";
-import { useRouter } from "expo-router";
+import { GlobalUser, UserRole } from "@/types/user";
+import { updateUserNameAndNewRole } from "@/utils/syncFirestore";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -18,10 +21,19 @@ export default function ProfileModal() {
   const { username, profileColor, setSetting } = useSettings();
   const [tempUsername, setTempUsername] = useState(username);
   const [hexInput, setHexInput] = useState(profileColor);
+  const { user } = useLocalSearchParams();
+  const parsedUser: GlobalUser | null = user ? JSON.parse(user as string) : null;
 
   // Valores de Firebase simulados 
   const [firebaseEmail, setFirebaseEmail] = useState("usuario@ejemplo.com");
   const [firebaseRole, setFirebaseRole] = useState("admin");
+
+  const UserRoles: Record<UserRole, string> = {
+    master: "Maestro",
+    admin: "Administrador",
+    worker: "Trabajador"
+  }
+
 
   const theme = useTheme();
   const router = useRouter();
@@ -30,6 +42,8 @@ export default function ProfileModal() {
   useEffect(() => {
     setHexInput(profileColor);
     setTempUsername(username);
+    setFirebaseEmail(parsedUser ? parsedUser.email : "Sin email");
+    setFirebaseRole(parsedUser ? UserRoles[parsedUser.userRole] : "Sin rol")
   }, [profileColor, username]);
 
   const handleCancel = async () => {
@@ -39,7 +53,7 @@ export default function ProfileModal() {
 
   const handleConfirm = async () => {
     await playSound(clickSound);
-    // Aquí iría la lógica del guardado
+    if(parsedUser) await updateUserNameAndNewRole(parsedUser?.id, tempUsername)
     router.replace("/(drawer)/settings");
   };
 
@@ -47,83 +61,85 @@ export default function ProfileModal() {
     <SafeAreaView
       style={[styles.modalContainer, { backgroundColor: theme.background }]}
     >
-      <Text style={[styles.header, { color: theme.text }]}>Editar perfil</Text>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <Text style={[styles.header, { color: theme.text }]}>Editar perfil</Text>
 
-      <View style={[styles.avatar, { backgroundColor: hexInput }]}>
-        <Text style={styles.avatarText}>
-          {(tempUsername?.charAt(0) || "?").toUpperCase()}
-        </Text>
-      </View>
+        <View style={[styles.avatar, { backgroundColor: hexInput }]}>
+          <Text style={styles.avatarText}>
+            {(tempUsername?.charAt(0) || "?").toUpperCase()}
+          </Text>
+        </View>
 
-      <Text style={[styles.label, { color: theme.text }]}>Nombre de usuario</Text>
-      <TextInput
-        style={[
-          styles.input,
-          { color: theme.text, borderColor: theme.primary },
-        ]}
-        placeholder="Tu nombre"
-        placeholderTextColor="#888"
-        value={tempUsername}
-        onChangeText={setTempUsername}
-      />
-
-      <Text style={[styles.label, { color: theme.text }]}>Correo</Text>
-      <TextInput
-        style={[styles.input, { color: theme.text }]}
-        value={firebaseEmail} //Valor del correo
-        editable={false}
-      />
-
-      <Text style={[styles.label, { color: theme.text }]}>Rol</Text>
-      <TextInput
-        style={[styles.input, { color: theme.text }]}
-        value={firebaseRole} // Valor del  rol
-        editable={false}
-      />
-
-      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
-        Color de perfil (HEX)
-      </Text>
-      <TextInput
-        style={[
-          styles.input,
-          {
-            color: theme.text,
-            borderColor: /^#([0-9A-Fa-f]{6})$/.test(hexInput)
-              ? theme.primary
-              : "#f44336",
-          },
-        ]}
-        placeholder="#ff00ff"
-        placeholderTextColor="#888"
-        value={hexInput}
-        onChangeText={setHexInput}
-      />
-
-      <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
-        Selector de color
-      </Text>
-      <View style={styles.pickerContainer}>
-        <WheelColorPicker
-          color={hexInput}
-          onColorChangeComplete={(color) => setHexInput(color)}
+        <Text style={[styles.label, { color: theme.text }]}>Nombre de usuario</Text>
+        <TextInput
+          style={[
+            styles.input,
+            { color: theme.text, borderColor: theme.primary },
+          ]}
+          placeholder="Tu nombre"
+          placeholderTextColor="#888"
+          value={parsedUser ? parsedUser.name : "Sin email"}
+          onChangeText={setTempUsername}
         />
-      </View>
 
-      <View style={styles.buttonContainer}>
-        <Pressable
-          style={[styles.button, { backgroundColor: "#999" }]}
-          onPress={handleCancel}
-        >
-          <Text style={styles.buttonText}>Cancelar</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.button, { backgroundColor: theme.primary }]}
-          onPress={handleConfirm}
-        >
-          <Text style={styles.buttonText}>Confirmar</Text>
-        </Pressable>
-      </View>
+        <Text style={[styles.label, { color: theme.text }]}>Correo</Text>
+        <TextInput
+          style={[styles.input, { color: "gray"}]}
+          value={firebaseEmail} //Valor del correo
+          editable={false}
+        />
+
+        <Text style={[styles.label, { color: theme.text }]}>Rol</Text>
+        <TextInput
+          style={[styles.input, { color: "gray" }]}
+          value={firebaseRole} // Valor del  rol
+          editable={false}
+        />
+
+        <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
+          Color de perfil (HEX)
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: theme.text,
+              borderColor: /^#([0-9A-Fa-f]{6})$/.test(hexInput)
+                ? theme.primary
+                : "#f44336",
+            },
+          ]}
+          placeholder="#ff00ff"
+          placeholderTextColor="#888"
+          value={hexInput}
+          onChangeText={setHexInput}
+        />
+
+        <Text style={[styles.label, { color: theme.text, marginTop: 16 }]}>
+          Selector de color
+        </Text>
+        <View style={styles.pickerContainer}>
+          <WheelColorPicker
+            color={hexInput}
+            onColorChangeComplete={(color) => setHexInput(color)}
+          />
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <Pressable
+            style={[styles.button, { backgroundColor: "#999" }]}
+            onPress={handleCancel}
+          >
+            <Text style={styles.buttonText}>Cancelar</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.button, { backgroundColor: theme.primary }]}
+            onPress={handleConfirm}
+          >
+            <Text style={styles.buttonText}>Confirmar</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -138,6 +154,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     alignSelf: "center",
+    marginTop: 20
   },
   label: {
     fontSize: 16,
@@ -185,9 +202,11 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
+    marginBottom: 30
   },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+
   },
 });

@@ -11,10 +11,12 @@ import {
   resetUserStats,
   updateUserStats,
 } from "@/store/trophiesStore";
+import { GlobalUser } from "@/types/user";
+import { getUserData } from "@/utils/syncFirestore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -38,7 +40,22 @@ export default function Settings() {
     //userRole,
   } = useSettings();
 
-  const isMaster = true; //userRole === 'master';
+  const [localUser, setLocalUser] = useState<GlobalUser | null>(null)
+
+  useEffect(() => {
+    const syncUser = async () => {
+      const userData = await getUserData();
+      if (userData) {
+        setLocalUser(userData as GlobalUser);
+      }
+      //console.log("Usuario encontrado:", actualUser);
+    }
+    syncUser();
+  }, []);
+
+
+
+  const isMaster = localUser?.userRole === 'master'; //userRole === 'master';
 
   const { playSound } = useSound();
   const theme = useTheme();
@@ -95,24 +112,13 @@ export default function Settings() {
         style={[styles.settingRow, styles.profileRow]}
         onPress={async () => {
           await playSound(clickSound);
-          router.push("../../modals/profile");
+          router.push({
+            pathname: "/modals/profile", params: {
+              user: JSON.stringify(localUser)
+            }
+          });
         }}
       >
-        {/* COMPONENTE CONDICIONAL - Solo visible para Master */}
-        {isMaster && (
-          <Pressable
-            style={[styles.settingRow, styles.profileRow]}
-            onPress={async () => {
-              await playSound(clickSound);
-              router.push("../../modals/userManager");
-            }}
-          >
-            <Text style={[styles.label, { color: theme.text }]}>
-              Gestionar permisos
-            </Text>
-            <Ionicons name="people-outline" size={24} color={theme.text} />
-          </Pressable>
-        )}
         <Text style={[styles.label, { color: theme.text }]}>Editar perfil</Text>
         <View style={[styles.avatarMini, { backgroundColor: profileColor }]}>
           <Text style={styles.avatarTextMini}>
@@ -120,6 +126,25 @@ export default function Settings() {
           </Text>
         </View>
       </Pressable>
+      {/* COMPONENTE CONDICIONAL - Solo visible para Master */}
+      {isMaster && (
+        <Pressable
+          style={[styles.settingRow, styles.profileRow]}
+          onPress={async () => {
+            await playSound(clickSound);
+            router.push({
+              pathname: "/modals/userManager", params: {
+                user: JSON.stringify(localUser)
+              }
+            });
+          }}
+        >
+          <Text style={[styles.label, { color: theme.text }]}>
+            Gestionar permisos
+          </Text>
+          <Ionicons name="people-outline" size={24} color={theme.text} />
+        </Pressable>
+      )}
 
       <SettingSwitch
         label="Modo oscuro"
