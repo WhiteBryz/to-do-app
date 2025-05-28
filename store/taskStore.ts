@@ -20,6 +20,7 @@ export const syncTasksFromFirebase = async (userUid:string | null): Promise<Task
     const userTasks: Task[] = snapshot.docs.map(doc => doc.data() as Task);
   
     await saveAllTasksAsyncStorage(userTasks);
+    //console.log("Entro syncTasksFromFirebase")
     
     return userTasks;
 
@@ -70,6 +71,7 @@ export const updateTask = async (updatedTask: Task) => {
     updatedTask.idNotification = await scheduleTodoNotification({ task: updatedTask, isReminder: false }) as string;
   }
 
+  updatedTask.updatedAt = new Date().toISOString()
   const tasks = await getAllTasksAsyncStorage();
   const newTasks = tasks.map(t => (t.id === updatedTask.id ? updatedTask : t));
   await saveAllTasksAsyncStorage(newTasks);

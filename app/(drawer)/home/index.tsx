@@ -5,9 +5,10 @@ import TextDivider from "@/components/TextDivider";
 import { useTheme } from "@/context/ThemeContext";
 import { useTasks } from '@/hooks/UseTasks';
 import { getUserId } from "@/services/authService";
-import { addTask, syncTasksFromFirebase, updateTask } from "@/store/taskStore";
+import { syncTasksFromFirebase, updateTask } from "@/store/taskStore";
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { FilterOption, Task, filters } from '@/types/task';
+import { createNewAutomaticTask } from "@/utils/createNewAutomaticTask";
 import { getTaskCategories } from '@/utils/dateFilters';
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link, useFocusEffect, useRouter } from 'expo-router';
@@ -39,7 +40,7 @@ export default function HomeScreen() {
     const hasTasksCompleted = filteredTasksCompleted.length > 0;
     const hasTasksIncompleted = filteredTasksIncompleted.length > 0;
     const [userUid, setUserUid] = useState<string | null>("")
-    
+
     // Traer uid del usuario
 
     useEffect(() => {
@@ -52,12 +53,13 @@ export default function HomeScreen() {
 
         return unsubscribe;
     }, []);
-
-    useEffect(()=>{
-        try{
+    
+    useEffect(() => {
+        try {
             setUserUid(getUserId());
             syncTasksFromFirebase(userUid)
-        } catch(e){
+            reload()
+        } catch (e) {
             console.log("Error")
         }
     })
@@ -90,40 +92,13 @@ export default function HomeScreen() {
             if (!task) return;
 
             const isNowCompleted = task.completed;
-
-            if (isNowCompleted && task.repeat && task.repeatInterval) {
-                const newDate = new Date(task.date);
-
-                switch (task.repeatInterval) {
-                    case 'daily':
-                        newDate.setDate(newDate.getDate() + 1);
-                        break;
-                    case 'weekly':
-                        newDate.setDate(newDate.getDate() + 7);
-                        break;
-                    case 'monthly':
-                        newDate.setMonth(newDate.getMonth() + 1);
-                        break;
-                    case 'yearly':
-                        newDate.setFullYear(newDate.getFullYear() + 1);
-                        break;
-                }
-
-                const repeatedTask: Task = {
-                    ...task,
-                    id: Date.now().toString(),
-                    date: newDate.toISOString(),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    completed: false,
-                };
-
-                await addTask(repeatedTask);
-
+            
+            // Código para generar una nueva tarea cuando se vaya a repetir. Se crea en automático cuando se marca como completado la tarea
+            if(await createNewAutomaticTask({task,isNowCompleted})){
                 task.repeat = false;
                 task.repeatInterval = 'none';
             }
-
+            
             await updateTask(task);
             const stats = await getUserStats();
             await updateUserStats({ tasksCompleted: stats.tasksCompleted + 1 });

@@ -5,7 +5,7 @@ export type RepeatInterval = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface Task {
   id: string;
-  createdBy: string, // ID del usuario que creó la tarea
+  createdBy: string | null, // ID del usuario que creó la tarea
   assignedTo?: string; // ID del usuario
   title: string;
   description: string;

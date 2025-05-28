@@ -1,6 +1,7 @@
 import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
 import { useSound } from '@/hooks/useSound';
+import { getUserId } from '@/services/authService';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
@@ -9,7 +10,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { Button, Icon, RadioButton, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,9 +27,10 @@ export default function NewTaskModal() {
   const [reminder, setReminder] = useState<ReminderOption>('none');
   const [repeat, setRepeat] = useState<boolean>(false);
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
-  const [createdBy, setCreateBy] = useState<string>('')
+  const [createdBy, setCreateBy] = useState<string | null >('')
   const [assignedTo, setAssignedTo] = useState<string>('')
-  
+  const [userUid, setUserUid] = useState<string | null>("")
+
   // Estados de los componentes
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -39,6 +41,14 @@ export default function NewTaskModal() {
   const [tempPriority, setTempPriority] = useState<PriorityLevel>(priority);
   const [tempReminder, setTempReminder] = useState(reminder);
   const [showReminderModal, setShowReminderModal] = useState(false);
+
+  useEffect(() => {
+    try {
+      setCreateBy(getUserId());
+    } catch (e) {
+      console.log("Error al traer el usuario de Firebase (newTask)")
+    }
+  })
 
   const openPriorityModal = () => {
     setTempPriority(priority);
@@ -117,8 +127,8 @@ export default function NewTaskModal() {
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      createdBy,
-      assignedTo
+      createdBy: createdBy,
+      assignedTo: assignedTo
     };
 
     const reminderOptions = {

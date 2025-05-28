@@ -1,5 +1,6 @@
 // app/(auth)/login.tsx
 import { useTheme } from "@/context/ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
@@ -19,6 +20,7 @@ export default function LoginScreen() {
         try {
             setError("");
             const userLogin =  await login(email, password);
+            await AsyncStorage.setItem("USER_UID", JSON.stringify({"userUid":userLogin.user.uid}))
             //console.log(userLogin.user.uid)
             router.replace({pathname: "/(drawer)/home"});
         } catch (err: any) {
