@@ -1,11 +1,12 @@
 import click from '@/assets/sounds/click.mp3';
 import { useTheme } from '@/context/ThemeContext';
 import { useSound } from '@/hooks/useSound';
-import { getUserId } from '@/services/authService';
 import { addTask as addTaskStorage } from '@/store/taskStore';
 import { evaluateTrophies, getUserStats, updateUserStats } from '@/store/trophiesStore';
 import { PriorityLevel, ReminderOption, RepeatInterval, Task } from '@/types/task';
+import { GlobalUser, UserRole } from '@/types/user';
 import { buildTaskDate, getReminderDate } from '@/utils/handleNotifications';
+import { fetchOtherUsers, getUserData } from '@/utils/syncFirestore';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { HStack, VStack } from "@react-native-material/core";
@@ -24,31 +25,48 @@ export default function NewTaskModal() {
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [date, setDate] = useState<Date>(() => new Date());
   const [time, setTime] = useState<Date>(() => new Date());
-  const [reminder, setReminder] = useState<ReminderOption>('none');
+  const [createdBy, setCreateBy] = useState<string>('')
+  const [assignedTo, setAssignedTo] = useState<UserRole>('worker')
   const [repeat, setRepeat] = useState<boolean>(false);
   const [repeatInterval, setRepeatInterval] = useState<RepeatInterval>('none');
-  const [createdBy, setCreateBy] = useState<string | null >('')
-  const [assignedTo, setAssignedTo] = useState<string>('')
-  const [userUid, setUserUid] = useState<string | null>("")
 
   // Estados de los componentes
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const { playSound } = useSound()
   const theme = useTheme()
-  //const [task, setTask] = useState<Task | null>(null);
+  // Para prioridades
   const [showPriorityModal, setShowPriorityModal] = useState(false);
   const [tempPriority, setTempPriority] = useState<PriorityLevel>(priority);
+  // Para recordatorios
+  const [reminder, setReminder] = useState<ReminderOption>('none');
   const [tempReminder, setTempReminder] = useState(reminder);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  // Para asignaciones de tareas
+  const [showAssignToModal, setShowAssignToModal] = useState(false)
+  const [taskAsignTo, setTaskAsignTo] = useState<string>("");
+  const [otherUsers, setOtherUsers] = useState<UserSummary[] | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  const [localUser, setLocalUser] = useState<GlobalUser | null>(null)
+
+  // Tipado para la lista de usuarios
+  interface UserSummary {
+    uid: string;
+    name: string;
+  }
 
   useEffect(() => {
-    try {
-      setCreateBy(getUserId());
-    } catch (e) {
-      console.log("Error al traer el usuario de Firebase (newTask)")
+    const syncUser = async () => {
+      const userData = await getUserData();
+      if(userData){
+        setLocalUser(userData as GlobalUser);
+        setCreateBy(userData?.id)
+      }
+      //console.log("Usuario encontrado:", actualUser);
     }
-  })
+    syncUser();
+  }, []);
 
   const openPriorityModal = () => {
     setTempPriority(priority);
@@ -89,6 +107,18 @@ export default function NewTaskModal() {
     '1day': 1440, // 24 horas * 60 minutos
   }
 
+  // Evaluar si es admin o máster para activar modal de asignar tarea
+  const isAdminOrMaster = localUser?.userRole == 'admin' || localUser?.userRole == 'master';
+  useEffect(() => {
+    const loadUsers = async () => {
+      const users = await fetchOtherUsers(localUser, isAdminOrMaster);
+      setOtherUsers(users);
+    };
+
+    loadUsers();
+  }, [localUser]);
+
+
   async function validateDatesOrAlert(taskDate: Date, reminderDate: Date): Promise<boolean> {
     const now = new Date();
 
@@ -128,7 +158,7 @@ export default function NewTaskModal() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: createdBy,
-      assignedTo: assignedTo
+      assignedTo: taskAsignTo
     };
 
     const reminderOptions = {
@@ -284,6 +314,26 @@ export default function NewTaskModal() {
               </Text>
             </TouchableOpacity>
           </View>
+          {/* Asignar tarea si es admin o master a: */}
+          {isAdminOrMaster && (
+            <View style={[styles.inlineItem, { marginBottom: 20 }]}>
+              <View style={styles.inlineLeft}>
+                <Icon source="account-arrow-right-outline" size={20} color={theme.primary} />
+                <Text style={[styles.inlineLabel, { color: theme.text }]}>Asignar tarea: </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setTaskAsignTo(taskAsignTo);
+                  setShowAssignToModal(true);
+                }}
+                style={[styles.linkButton]}
+              >
+                <Text style={[styles.linkText, { color: theme.background, backgroundColor: theme.buttonBackground }]}>
+                  {taskAsignTo?.length != 0 ? "Ya asignado" : "Sin asignar"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <Modal visible={showReminderModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
@@ -362,6 +412,62 @@ export default function NewTaskModal() {
           </Modal>
           {/*Termina */}
 
+          {/* Asignar tarea modal */}
+          {isAdminOrMaster && (
+            <Modal visible={showAssignToModal} transparent animationType="fade">
+              <View style={styles.modalOverlay}>
+                <View style={[styles.dialogContent, { backgroundColor: theme.card }]}>
+                  <Text style={[styles.dialogTitle, { color: theme.text }]}>
+                    Asigna la tarea a un usuario:
+                  </Text>
+
+                  <RadioButton.Group
+                    onValueChange={(newValue) => setSelectedUserId(newValue)}
+                    value={selectedUserId}
+                  >
+                    {otherUsers?.length === 0 ?(
+                      <Text style={{ color: theme.text }}>No hay otros usuarios disponibles.</Text>
+                    ) : otherUsers?.map(user => (
+                      <RadioButton.Item
+                        key={user.uid}
+                        labelStyle={[styles.radioLabel, { color: theme.text }]}
+                        label={user.name}
+                        value={user.uid}
+                        mode="android"
+                      />
+                    ))}
+                  </RadioButton.Group>
+
+                  <View style={styles.dialogActions}>
+                    <Button
+                      onPress={() => setShowAssignToModal(false)}
+                      compact
+                      labelStyle={{ color: theme.buttonText }}
+                      style={{ marginLeft: 8 }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onPress={() => {
+                        if (selectedUserId) {
+                          // Aquí haces algo con el usuario asignado
+                          setTaskAsignTo(selectedUserId);
+                        }
+                        setShowAssignToModal(false);
+                      }}
+                      compact
+                      labelStyle={{ color: theme.buttonText }}
+                    >
+                      Aceptar
+                    </Button>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+
+          )}
+          {/* Termina asignar tarea modal */}
+
           {/*Empieza */}
           {/* Repetición */}
           <View style={styles.repeatSection}>
@@ -404,10 +510,6 @@ export default function NewTaskModal() {
             )}
           </View>
 
-
-          {/*Termina */}
-
-          {/* Inicia */}
           {/* Notas */}
           <Text variant="titleMedium" style={[styles.label, { color: theme.text, marginTop: 20 }]}>Notas</Text>
           <TextInput

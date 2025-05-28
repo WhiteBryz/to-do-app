@@ -11,22 +11,28 @@ const usersDirective = 'users/'
 
 const getUserId = () => auth.currentUser?.uid;
 
-export const syncTasksFromFirebase = async (userUid:string | null): Promise<Task[]> => {
+export const syncTasksFromFirebase = async (userUid: string | null): Promise<Task[]> => {
 
-  try{
-    const taskRef = collection(fireStore,'tasks/'); // aquí estaba sin /
-    const q = query(taskRef, where('createdBy','==',userUid) || where('assignedTo','==',userUid))
-    
-    const snapshot = await getDocs(q);
-    
-    const userTasks: Task[] = snapshot.docs.map(doc => doc.data() as Task);
-  
-    await saveAllTasksAsyncStorage(userTasks);
+  try {
+    const taskRef = collection(fireStore, 'tasks/'); // aquí estaba sin /
+    const q1 = query(taskRef, where('createdBy', '==', userUid))
+    const q2 = query(taskRef, where('assignedTo', '==', userUid));
+
+
+    const [assignedSnap, createdSnap] = await Promise.all([getDocs(q1), getDocs(q2)]);
+
+    const tasksMap = new Map<string, Task>();
+    assignedSnap.docs.forEach(doc => tasksMap.set(doc.id, doc.data() as Task));
+    createdSnap.docs.forEach(doc => tasksMap.set(doc.id, doc.data() as Task));
+
+    const allUserTasks = Array.from(tasksMap.values());
+
+    await saveAllTasksAsyncStorage(allUserTasks);
     //console.log("Entro syncTasksFromFirebase")
-    
-    return userTasks;
 
-  } catch(e){
+    return allUserTasks;
+
+  } catch (e) {
     console.error("Error al sincronizar tareas desde Firebase: ", e);
     return [];
   }
@@ -81,7 +87,7 @@ export const updateTask = async (updatedTask: Task) => {
   const uid = getUserId();
   if (uid) {
     const taskRef = doc(fireStore, `tasks/${updatedTask.id}`);
-    await setDoc(taskRef, updatedTask, {merge: true});
+    await setDoc(taskRef, updatedTask, { merge: true });
   }
 };
 

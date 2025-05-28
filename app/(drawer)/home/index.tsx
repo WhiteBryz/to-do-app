@@ -71,8 +71,6 @@ export default function HomeScreen() {
             // Recargar tareas del firebase
             const syncAndReload = async () => {
                 const uid = getUserId();
-                setUserUid(uid);
-
                 if (uid) {
                     await syncTasksFromFirebase(uid);
                     await reload();
